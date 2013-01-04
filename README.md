@@ -20,5 +20,5 @@ An actor has the following characteristics:
 
 ## Similar projects
 
-- [Pykka](http://pykka.readthedocs.org/en/latest/) 
+- [Pykka](http://pykka.readthedocs.org/en/latest/) is easy to use concurrency for Python using the actor model
 
