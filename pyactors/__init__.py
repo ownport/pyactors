@@ -71,6 +71,7 @@ class Environment(object):
         actor.postbox = self._postbox
         self._actors_map[actor.urn] = actor
         _logger.debug('Registered %s', actor)
+        return actor.urn
 
     def unregister(self, urn=None, actor=None):
         """ unregister actor from the environment.
@@ -78,10 +79,12 @@ class Environment(object):
         
         if actor and actor.urn in self._actors_map:
             self._actors_map.pop(actor.urn)
+            self._inboxes.pop(actor.urn)
             _logger.debug('Unregistered %s', actor)
             
         elif urn and urn in  self._actors_map:
             self._actors_map.pop(urn)
+            self._inboxes.pop(urn)
             _logger.debug('Unregistered %s', actor)
         
         else:

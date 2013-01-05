@@ -106,4 +106,5 @@ class ActorsEnvironmentTest(unittest.TestCase):
 
         for actor in pyactors.get_all():
             pyactors.unregister(actor=actor)
+
         

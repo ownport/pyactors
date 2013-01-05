@@ -46,7 +46,7 @@ class Postbox(object):
         ''' send message to actor by URN
         '''
         if urn not in self.__inboxes:
-            raise ActorDeadException(urn)
+            raise RuntimeError("Unknown actor's urn: %s" % urn)
         
         self.__inboxes[urn].put(message)
 
