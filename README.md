@@ -20,9 +20,9 @@ An actor has the following characteristics:
 
 ## Documentation
 
-- [Introduction](http://https://github.com/ownport/pyactors/tree/master/docs/introduction.md)
-- [PyActors API](http://https://github.com/ownport/pyactors/tree/master/docs/api.md)
-- [For developers](http://https://github.com/ownport/pyactors/tree/master/docs/development.md)
+- [Introduction](https://github.com/ownport/pyactors/blob/master/docs/introduction.md)
+- [PyActors API](https://github.com/ownport/pyactors/blob/master/docs/api.md)
+- [For developers](https://github.com/ownport/pyactors/blob/master/docs/development.md)
 
 ## Similar projects
 
