@@ -15,3 +15,22 @@ An actor has the following characteristics:
  * None of the actions are required, and they may be applied in any order.
  * It only processes one message at a time. In other words, a single actor does not give you any concurrency, and it does not need to use e.g. locks to protect its own state.
 
+## Links
+
+## Useful info
+
+**gevent** is a Python networking library that uses greenlet to provide a synchronous API on top of libevent event loop.
+
+Features include:
+
+- Fast event loop based on libevent (epoll on Linux, kqueue on FreeBSD).
+- Lightweight execution units based on greenlet.
+- API that re-uses concepts from the Python standard library (e.g. Event, Queue).
+- Cooperative socket and ssl modules.
+- Ability to use standard library and 3rd party modules written for standard blocking sockets (gevent.monkey).
+- DNS queries performed through libevent-dns.
+- Fast WSGI server based on libevent-http.
+
+Home page, http://www.gevent.org/
+
+
