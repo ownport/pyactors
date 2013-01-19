@@ -1,7 +1,7 @@
 pyactors
 ========
 
-Simple implementation actors on python
+Simple implementation actors on python. Experimental project.
 
 ## Documentation
 
