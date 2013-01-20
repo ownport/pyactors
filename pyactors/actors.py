@@ -83,8 +83,9 @@ class Actor(object):
     def loop(self):
         ''' main actor's loop
         '''
+        yield actor_status.not_started
         while True:
-            yield actor_status.not_started
+            yield actor_status.waiting
 
     def run_once(self):
         ''' run actor just once
