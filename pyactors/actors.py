@@ -101,16 +101,6 @@ class Actor(object):
             raise NonRegisteredActorException(self)
         self.postbox.send(urn, message)
 
-    def dump(self):
-        ''' dump actor data
-        '''
-        pass
-
-    def load(self, data):
-        ''' load actor data
-        '''
-        pass
-
 
 class SimpleActor(Actor):
     ''' SimpleActor
