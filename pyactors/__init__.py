@@ -44,8 +44,8 @@ class IncorrectURNException(Exception):
     pass
 
 
-class Environment(object):
-    ''' Actors environment
+class ActorSystem(object):
+    ''' Actor System 
     '''
     
     def __init__(self):
@@ -59,7 +59,7 @@ class Environment(object):
         self._postbox = Postbox(self._inboxes)
     
     def register(self, actor):
-        ''' register actor in the environment
+        ''' register actor in the system
         '''
         if not actor or not isinstance(actor, object):
             raise RuntimeError('Incorrect actor: %s' % actor)
@@ -74,7 +74,7 @@ class Environment(object):
         return actor.urn
 
     def unregister(self, urn=None, actor=None):
-        """ unregister actor from the environment.
+        """ unregister actor from the system.
         """
         
         if actor and actor.urn in self._actors_map:
@@ -88,7 +88,7 @@ class Environment(object):
             _logger.debug('Unregistered %s', actor)
         
         else:
-            _logger.debug('Unregistered %s (not found in the environment)', actor)
+            _logger.debug('Unregistered %s (not found in the system)', actor)
 
     def get_all(self):
         """ return all running actors.
@@ -136,7 +136,7 @@ class Environment(object):
             self._postbox.send(actor.urn, message)
 
     def run(self):
-        ''' run actors in the environment
+        ''' run actors in the system
         '''
         total_actors = len(self._actors_map)
         stopped_actors = 0
@@ -185,46 +185,46 @@ class Environment(object):
         # return [ref.stop(block, timeout) for ref in reversed(cls.get_all())]
         pass
 
-env = Environment()
+actor_system = ActorSystem()
 
 def register(actor):
-    ''' register actor in the current environment
+    ''' register actor in the current system
     '''
-    env.register(actor)
+    actor_system.register(actor)
 
 def unregister(urn=None, actor=None):
-    ''' unregister actor in the current environment by URN or actor
+    ''' unregister actor in the current system by URN or actor
     '''
-    env.unregister(urn, actor)
+    actor_system.unregister(urn, actor)
 
 def get_all():
     ''' return list of active actors
     '''
-    return env.get_all()
+    return actor_system.get_all()
 
 def get_by_urn(urn):
     ''' return actor by URN
     '''
-    return env.get_by_urn(urn)
+    return actor_system.get_by_urn(urn)
 
 def get_by_class(actor_class):
     ''' return the list of actors selected by given class
     '''
-    return env.get_by_class(actor_class)
+    return actor_system.get_by_class(actor_class)
 
 def get_by_class_name(actor_class_name):
     ''' return the list of actors selected by given class name
     '''
-    return env.get_by_class_name(actor_class_name)
+    return actor_system.get_by_class_name(actor_class_name)
 
 def broadcast(message, target_class=None):
     ''' Broadcast message to all actors of the specified target_class.
     '''
-    env.broadcast(message, target_class)
+    actor_system.broadcast(message, target_class)
 
 def run():
     ''' Run initialized actors
     '''
-    env.run()
+    actor_system.run()
 
     
