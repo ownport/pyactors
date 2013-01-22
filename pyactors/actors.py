@@ -1,5 +1,6 @@
 
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
+__version__ = '0.1-gevent'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -23,75 +24,23 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import uuid
-import logging
+import gevent
 
-from pyactors.inbox import DequeInbox
-
-_logger = logging.getLogger('pyactors')
-
-''' Variables
-'''
-# Actor Status
-class ActorStatus():
-    ''' actor status '''
-    not_started     = 0
-    waiting         = 1
-    processing      = 2
-actor_status = ActorStatus()    
-
-
-''' Exceptions
-'''
-class ActorDeadException(Exception):
-    ''' Exception raised when trying to use a dead or unavailable actor
-    '''
-    pass
-
-class NonRegisteredActorException(Exception):
-    ''' Exception raised when trying to use a unregistered actor
-    '''
-    pass
-
-
-''' Classes
-'''
-
-class Actor(object):
+class Actor(gevent.Greenlet):
     ''' Actor
     '''
-    def __init__(self, *args, **kwargs):
-        ''' init
+    def __init__(self):
+        ''' __init__
         '''
+        super(Actor, self).__init__()
         # The actor URN string is a universally unique identifier for the actor.    
-        self.urn = uuid.uuid4().urn
+        self.urn = uuid.uuid4().urn    
         
-        # Actor's inbox
-        self.inbox = DequeInbox()
-        
-        # postbox used for sending messages to another actors, 
-        # assigned to actor when its registered in the environment
-        self.postbox = None
-        
-        # actor processing loop
-        self.running = self.loop()
-
     def __str__(self):
         ''' represent actor as string
         '''
-        return "%(class)s (%(urn)s)" % {'class': self.__class__.__name__, 'urn': self.urn }
+        return "%(class)s (%(urn)s)" % {'class': self.__class__.__name__, 'urn': self.urn }    
 
-    def loop(self):
-        ''' main actor's loop
-        '''
-        yield actor_status.not_started
-        while True:
-            yield actor_status.waiting
-
-    def run_once(self):
-        ''' run actor just once
-        '''
-        return self.running.next()
-        
     def send(self, urn, message):
         ''' send message to another actors by urn
         '''
@@ -102,9 +51,6 @@ class Actor(object):
             raise NonRegisteredActorException(self)
         self.postbox.send(urn, message)
 
-
 class SimpleActor(Actor):
-    ''' SimpleActor
-    '''
     pass
-
+        

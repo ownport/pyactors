@@ -1,6 +1,6 @@
 
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
-__version__ = '0.1'
+__version__ = '0.1-gevent'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -23,18 +23,22 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
+import gevent
 import logging
-
-from pyactors.inbox import DequeInbox, Postbox
-from pyactors.actors import ActorDeadException
-from pyactors.actors import Actor, SimpleActor
-from pyactors.actors import actor_status
 
 try:
     _basestring = basestring
 except NameError:
     # Python 3
     _basestring = str
+
+from pyactors.actors import Actor, SimpleActor
+
+__all__ = [
+    'ActorSystem', 'actor_system', 'broadcast', 'get_all', 'get_by_class',
+    'get_by_class_name', 'get_by_urn', 'register', 'unregister', 'run',
+    'Actor', 'SimpleActor',
+]
 
 _logger = logging.getLogger('pyactors')
 
@@ -44,6 +48,7 @@ class IncorrectURNException(Exception):
     pass
 
 
+
 class ActorSystem(object):
     ''' Actor System 
     '''
@@ -51,74 +56,39 @@ class ActorSystem(object):
     def __init__(self):
         ''' __init__
         '''
-        # active actors
-        self._actors_map = dict()
-        # actor's inboxes
-        self._inboxes = dict()
-        # postbox for active actors
-        self._postbox = Postbox(self._inboxes)
+        pass
     
     def register(self, actor):
         ''' register actor in the system
         '''
-        if not actor or not isinstance(actor, object):
-            raise RuntimeError('Incorrect actor: %s' % actor)
-        if actor.urn in self._actors_map:
-            raise RuntimeError('Second attempt for actor registeration: %s' % actor)
-            
-        self._inboxes[actor.urn] = DequeInbox()
-        actor.inbox = self._inboxes[actor.urn]
-        actor.postbox = self._postbox
-        self._actors_map[actor.urn] = actor
-        _logger.debug('Registered %s', actor)
-        return actor.urn
+        pass
 
     def unregister(self, urn=None, actor=None):
         """ unregister actor from the system.
         """
-        
-        if actor and actor.urn in self._actors_map:
-            self._actors_map.pop(actor.urn)
-            self._inboxes.pop(actor.urn)
-            _logger.debug('Unregistered %s', actor)
-            
-        elif urn and urn in  self._actors_map:
-            self._actors_map.pop(urn)
-            self._inboxes.pop(urn)
-            _logger.debug('Unregistered %s', actor)
-        
-        else:
-            _logger.debug('Unregistered %s (not found in the system)', actor)
+        pass
 
     def get_all(self):
         """ return all running actors.
         """
-        return self._actors_map.values()
+        pass
 
     def get_by_urn(self, urn):
         ''' return an actor by its universally unique URN.
         '''
-        if not isinstance(urn, (str, unicode)):
-            raise IncorrectURNException(urn)
-        if urn in self._actors_map:
-            return actor[urn]
-        return None
+        pass
 
     def get_by_class(self, actor_class):
         ''' return the list of all running actors of the given class, or of
         any subclass of the given class.
         '''
-        return [actor 
-                    for actor in self.get_all() 
-                    if isinstance(actor, actor_class)]
+        pass
 
     def get_by_class_name(self, actor_class_name):
         ''' return the list of all running actors of the given class
         name.
         '''
-        return [actor 
-                    for actor in self.get_all() 
-                    if actor.__class__.__name__ == actor_class_name]
+        pass
 
     def broadcast(self, message, target_class=None):
         ''' Broadcast message to all actors of the specified target_class.
@@ -126,45 +96,12 @@ class ActorSystem(object):
         If no target_class is specified, the message is broadcasted to all
         actors.
         '''
-        if isinstance(target_class, _basestring):
-            targets = self.get_by_class_name(target_class)
-        elif target_class is not None:
-            targets = self.get_by_class(target_class)
-        else:
-            targets = self.get_all()
-        for actor in targets:
-            self._postbox.send(actor.urn, message)
+        pass
 
     def run(self):
         ''' run actors in the system
         '''
-        total_actors = len(self._actors_map)
-        stopped_actors = 0
-        while True:
-            if stopped_actors == total_actors:
-                break
-                
-            # the number of waiting actors is 0 for every round 
-            waiting_actors = 0
-            
-            for actor in self.get_all():
-                try:
-                    status = actor.run_once()
-
-                    if status == actor_status.waiting:
-                        waiting_actors += 1
-
-                    elif status == actor_status.not_started:
-                        self.unregister(actor=actor)
-                        stopped_actors += 1
-                        
-                except StopIteration:
-                    self.unregister(actor)
-                    stopped_actors += 1
-            
-            # if all actors are waiting for data -> stop running
-            if waiting_actors == total_actors:
-                break
+        pass
 
     def stop_all(self, block=True, timeout=None):
         ''' Stop all running actors.
@@ -181,8 +118,6 @@ class ActorSystem(object):
         should take care to shut them down in the required order yourself, e.g.
         by stopping dependees from a dependency's on_stop() method.
         '''
-
-        # return [ref.stop(block, timeout) for ref in reversed(cls.get_all())]
         pass
 
 actor_system = ActorSystem()
