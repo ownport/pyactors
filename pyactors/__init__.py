@@ -24,7 +24,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import gevent
-import logging
+import inspect
 
 try:
     _basestring = basestring
@@ -32,23 +32,34 @@ except NameError:
     # Python 3
     _basestring = str
 
-from pyactors.actors import Actor, SimpleActor
+from pyactors.actors import Actor
 
 __all__ = [
-    'ActorSystem', 'actor_system', 'broadcast', 'get_all', 'get_by_class',
-    'get_by_class_name', 'get_by_urn', 'register', 'unregister', 'run',
-    'Actor', 'SimpleActor',
+    'ActorSystem', 'actor_system', 
+    'broadcast', 
+    'find', 'get_by_class', 'get_by_class_name', 'get_by_urn', 
+    'add', 'remove', 
+    'run',
+    'Actor',
 ]
 
+#
+#   logging
+#
+import logging
 _logger = logging.getLogger('pyactors')
 
+#
+#   Exceptions
+#
 class IncorrectURNException(Exception):
     ''' Exception raised when trying to use URN different format than string or unicode
     '''
     pass
 
-
-
+#
+#   ActorSystem
+#
 class ActorSystem(object):
     ''' Actor System 
     '''
@@ -56,39 +67,60 @@ class ActorSystem(object):
     def __init__(self):
         ''' __init__
         '''
-        pass
+        self._actors = dict()
     
-    def register(self, actor):
-        ''' register actor in the system
+    def add(self, actor):
+        ''' add actor to the system
         '''
-        pass
+        if Actor not in inspect.getmro(actor.__class__):
+            raise RuntimeError('Actor must be inherited from pyactors.Actor: %s' % actor)
+        if actor.urn in self._actors:
+            raise RuntimeError('Second attempt to add existing actor: %s' % actor)
+            
+        self._actors[actor.urn] = actor
+        _logger.debug('Added %s', actor)
+        return actor.urn
 
-    def unregister(self, urn=None, actor=None):
-        """ unregister actor from the system.
+    def remove(self, urn):
+        """ remove actor from the system.
         """
-        pass
+        if urn and urn in self._actors:
+            self._actors.pop(urn)
+            _logger.debug('Removed %s', urn)
+        
+        else:
+            _logger.debug('Removing actor %s (not found in the system)', urn)
+            raise RuntimeError('Actor not found in the system, urn: %s', urn)
 
-    def get_all(self):
-        """ return all running actors.
+    def find(self, urn=None, actor_class=None, actor_class_name=None):
+        """ search actors in the system
+        
+        - if no criterias are defined, return all existing actors urn's
+        
+        - if urn is defined as string or unicode, return an actor by its URN.
+        - if urn is defined as list or tuple, return actors by thier URNs.
+        
+        - if actor_class is defined as string or unicode, return the list of all 
+        existing actors of the given class, or of any subclass of the given class.
+        - if actor_class is defined as list or tuple, return actors by thier URNs.
+        
+        - if actor_class_name is defined, return the list of all existing actors of 
+        the given class name.
+        
+        return existing actors by criterias.
         """
-        pass
-
-    def get_by_urn(self, urn):
-        ''' return an actor by its universally unique URN.
-        '''
-        pass
-
-    def get_by_class(self, actor_class):
-        ''' return the list of all running actors of the given class, or of
-        any subclass of the given class.
-        '''
-        pass
-
-    def get_by_class_name(self, actor_class_name):
-        ''' return the list of all running actors of the given class
-        name.
-        '''
-        pass
+        if urn and isinstance(urn, (str, unicode)):
+            return [actor for actor in self._actors.values() if actor.urn == urn]
+        if urn and isinstance(urn, (list, tuple)):
+            return [actor for actor in self._actors.values() if actor.urn in urn]
+            
+        if actor_class:
+            return [actor for actor in self.find() if isinstance(actor, actor_class)]
+        
+        if actor_class_name:
+            return [actor for actor in self.find() if actor.__class__.__name__ == actor_class_name]
+        
+        return self._actors.values()    
 
     def broadcast(self, message, target_class=None):
         ''' Broadcast message to all actors of the specified target_class.
@@ -120,46 +152,37 @@ class ActorSystem(object):
         '''
         pass
 
-actor_system = ActorSystem()
+_actor_system = ActorSystem()
 
-def register(actor):
-    ''' register actor in the current system
+def add(actor):
+    ''' add actor to the system
     '''
-    actor_system.register(actor)
+    return _actor_system.add(actor)
 
-def unregister(urn=None, actor=None):
-    ''' unregister actor in the current system by URN or actor
+def remove(urn):
+    ''' remove actor from the system
     '''
-    actor_system.unregister(urn, actor)
+    _actor_system.remove(urn)
 
-def get_all():
-    ''' return list of active actors
+def find(urn=None, actor_class=None, actor_class_name=None):
+    ''' return list of existing actors according to criterias
+    
+    see details in ActorSystem.find()
     '''
-    return actor_system.get_all()
-
-def get_by_urn(urn):
-    ''' return actor by URN
-    '''
-    return actor_system.get_by_urn(urn)
-
-def get_by_class(actor_class):
-    ''' return the list of actors selected by given class
-    '''
-    return actor_system.get_by_class(actor_class)
-
-def get_by_class_name(actor_class_name):
-    ''' return the list of actors selected by given class name
-    '''
-    return actor_system.get_by_class_name(actor_class_name)
+    return _actor_system.find(
+                                urn=urn, 
+                                actor_class=actor_class, 
+                                actor_class_name=actor_class_name
+    )
 
 def broadcast(message, target_class=None):
     ''' Broadcast message to all actors of the specified target_class.
     '''
-    actor_system.broadcast(message, target_class)
+    _actor_system.broadcast(message, target_class)
 
 def run():
     ''' Run initialized actors
     '''
-    actor_system.run()
+    _actor_system.run()
 
     

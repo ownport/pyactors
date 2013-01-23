@@ -41,6 +41,12 @@ class Actor(gevent.Greenlet):
         '''
         return "%(class)s (%(urn)s)" % {'class': self.__class__.__name__, 'urn': self.urn }    
 
+    def _run(self):
+        ''' main loop
+        '''
+        while self.started:
+            break
+
     def send(self, urn, message):
         ''' send message to another actors by urn
         '''
@@ -50,7 +56,4 @@ class Actor(gevent.Greenlet):
         if not self.postbox:
             raise NonRegisteredActorException(self)
         self.postbox.send(urn, message)
-
-class SimpleActor(Actor):
-    pass
-        
+            
