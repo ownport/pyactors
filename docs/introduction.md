@@ -15,6 +15,10 @@ An actor has the following characteristics:
  * None of the actions are required, and they may be applied in any order.
  * It only processes one message at a time. In other words, a single actor does not give you any concurrency, and it does not need to use e.g. locks to protect its own state.
 
+## Greenlets
+
+Greenlets, sometimes referred to as "green threads," are a lightweight structure that allows you to do some cooperative multithreading in Python without the system overhead of real threads (like the thread or threading module would use). The main thing to keep in mind when dealing with greenlets is that a greenlet will never yield to another greenlet unless it calls some function in gevent that yields.
+
 ### It does not share state with anybody else.
 
 ```python
