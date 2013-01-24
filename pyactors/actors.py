@@ -25,6 +25,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import uuid
 import gevent
+from gevent.queue import Queue
 
 class Actor(gevent.Greenlet):
     ''' Actor
@@ -34,7 +35,11 @@ class Actor(gevent.Greenlet):
         '''
         super(Actor, self).__init__()
         # The actor URN string is a universally unique identifier for the actor.    
-        self.urn = uuid.uuid4().urn    
+        self.urn = uuid.uuid4().urn  
+        # storage for incoming messages
+        self.inbox = Queue()  
+        # all messages send via postbox
+        self.postbox = None
         
     def __str__(self):
         ''' represent actor as string

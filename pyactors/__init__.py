@@ -33,6 +33,7 @@ except NameError:
     _basestring = str
 
 from pyactors.actors import Actor
+from pyactors.messages import Postbox
 
 __all__ = [
     'ActorSystem', 'actor_system', 
@@ -68,6 +69,7 @@ class ActorSystem(object):
         ''' __init__
         '''
         self._actors = dict()
+        self._postbox = Postbox()
     
     def add(self, actor):
         ''' add actor to the system
@@ -78,6 +80,10 @@ class ActorSystem(object):
             raise RuntimeError('Second attempt to add existing actor: %s' % actor)
             
         self._actors[actor.urn] = actor
+        self._postbox.add(actor.urn, actor.inbox)
+        actor.postbox = self._postbox
+        actor.start()
+        
         _logger.debug('Added %s', actor)
         return actor.urn
 
@@ -86,6 +92,7 @@ class ActorSystem(object):
         """
         if urn and urn in self._actors:
             self._actors.pop(urn)
+            self._postbox.remove(urn)
             _logger.debug('Removed %s', urn)
         
         else:
