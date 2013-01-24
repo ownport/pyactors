@@ -17,7 +17,11 @@ An actor has the following characteristics:
 
 ## Greenlets
 
-Greenlets, sometimes referred to as "green threads," are a lightweight structure that allows you to do some cooperative multithreading in Python without the system overhead of real threads (like the thread or threading module would use). The main thing to keep in mind when dealing with greenlets is that a greenlet will never yield to another greenlet unless it calls some function in gevent that yields.
+Greenlets, sometimes referred to as "green threads," are a lightweight structure that allows you to do some cooperative multithreading in Python without the system overhead of real threads (like the thread or threading module would use). The main thing to keep in mind when dealing with greenlets is that a greenlet will never yield to another greenlet unless it calls some function in gevent that yields. 
+
+Note in particular how the greenlet didn't do anything until we called sleep(). sleep() is one of the functions in gevent which will yield to other greenlets. If you want to yield to other greenlets but don't care to wait a second if there's no one ready to run, you can call gevent.sleep(0).
+
+(c) Just a little python, http://blog.pythonisito.com/2012/07/gevent-and-greenlets.html
 
 ### It does not share state with anybody else.
 
@@ -62,4 +66,7 @@ Features include:
 
 Home page, http://www.gevent.org/
 
+**greenlet** A `greenlet` is a small independent pseudo-thread. Think about it as a small stack of frames; the outermost (bottom) frame is the initial function you called, and the innermost frame is the one in which the greenlet is currently paused. You work with greenlets by creating a number of such stacks and jumping execution between them. Jumps are never implicit: a greenlet must choose to jump to another greenlet, which will cause the former to suspend and the latter to resume where it was suspended. Jumping between greenlets is called `switching`.
+
+Home page, http://greenlet.readthedocs.org/en/latest/
 
