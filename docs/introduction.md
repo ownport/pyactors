@@ -66,7 +66,7 @@ Features include:
 
 Home page, http://www.gevent.org/
 
-**greenlet** A `greenlet` is a small independent pseudo-thread. Think about it as a small stack of frames; the outermost (bottom) frame is the initial function you called, and the innermost frame is the one in which the greenlet is currently paused. You work with greenlets by creating a number of such stacks and jumping execution between them. Jumps are never implicit: a greenlet must choose to jump to another greenlet, which will cause the former to suspend and the latter to resume where it was suspended. Jumping between greenlets is called `switching`.
+**greenlet** A `greenlet` is a small independent pseudo-thread. Think about it as a small stack of frames; the outermost (bottom) frame is the initial function you called, and the innermost frame is the one in which the greenlet is currently paused. You work with greenlets by creating a number of such stacks and jumping execution between them. Jumps are never implicit: a greenlet must choose to jump to another greenlet, which will cause the former to suspend and the latter to resume where it was suspended. Jumping between greenlets is called `switching`.s
 
 Home page, http://greenlet.readthedocs.org/en/latest/
 
@@ -76,4 +76,7 @@ Home page, http://greenlet.readthedocs.org/en/latest/
 - Green threads cooperatively yield to each other instead of preemptively being scheduled. The major advantage from this behavior is that shared data structures don’t need locks, because only if a yield is explicitly called can another green thread have access to the data structure. It is also possible to inspect primitives such as queues to see if they have any pending data.
 
 Home page, http://eventlet.net/doc/index.html
+
+The presentation **"An introduction to Python concurrency"**
+http://www.slideshare.net/dabeaz/an-introduction-to-python-concurrency
 
