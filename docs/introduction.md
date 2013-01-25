@@ -70,3 +70,10 @@ Home page, http://www.gevent.org/
 
 Home page, http://greenlet.readthedocs.org/en/latest/
 
+**Eventlet** is built around the concept of green threads (i.e. coroutines, we use the terms interchangeably) that are launched to do network-related work. Green threads differ from normal threads in two main ways:
+
+- Green threads are so cheap they are nearly free. You do not have to conserve green threads like you would normal threads. In general, there will be at least one green thread per network connection.
+- Green threads cooperatively yield to each other instead of preemptively being scheduled. The major advantage from this behavior is that shared data structures don’t need locks, because only if a yield is explicitly called can another green thread have access to the data structure. It is also possible to inspect primitives such as queues to see if they have any pending data.
+
+Home page, http://eventlet.net/doc/index.html
+
