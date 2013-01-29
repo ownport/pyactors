@@ -22,6 +22,8 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
+import uuid
+
 try:
     import settings
 except ImportError:
@@ -37,7 +39,7 @@ class Actor(object):
         self._name = name
         
         # actor address
-        self.address = None
+        self.address = uuid.uuid4().hex
         
         # actor mailbox 
         self._mailbox = None
@@ -109,6 +111,7 @@ class Actor(object):
         
         return self.children    
 
+    @property
     def started(self):
         ''' return True if actor is started
         '''
