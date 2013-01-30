@@ -1,7 +1,7 @@
 pyactors
 ========
 
-Simple implementation actors on python. Experimental project.
+Simple implementation actors on python. Experimental project. It's attempt to merge generators, greenlets, threads and processes under actor concept.
 
 ## Documentation
 
