@@ -119,14 +119,14 @@ class Actor(object):
         ''' return True if actor is started
         '''
         return self._started 
-
-    def _supervise(self):
-        ''' supervise child actors
-        '''
-        pass
         
     def run(self):
         ''' run actor
+        '''
+        pass
+
+    def run_once(self):
+        ''' run actor once
         '''
         pass
 
