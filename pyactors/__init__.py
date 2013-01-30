@@ -41,6 +41,9 @@ class Actor(object):
         # actor address
         self.address = uuid.uuid4().hex
         
+        # actor's parent
+        self._parent = None
+        
         # actor mailbox 
         self._mailbox = None
         
@@ -69,10 +72,10 @@ class Actor(object):
     def remove_child(self, address):
         ''' remove child by its address
         '''
-        if actor.address in self.children:
-            self._children.pop(actor.address)
+        if address in self._children.keys():
+            self._children.pop(address)
         else:
-            raise RuntimeError('Actor does not exist: %s', actor)
+            raise RuntimeError('Actor does not exist, address: %s', address)
         
     @property
     def children(self):
@@ -132,10 +135,10 @@ class Actor(object):
         '''
         self._postbox.send(address, message)
 
-    def sleep(self, timeout=0):
-        ''' sleep actor for timeout
+    def loop(self):
+        ''' mail loop 
         '''
-        pass        
+        pass
     
 class  ActorSystem(Actor):
     ''' Actor System
