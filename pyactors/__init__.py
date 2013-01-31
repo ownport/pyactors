@@ -44,14 +44,17 @@ class Actor(object):
         # actor's parent
         self._parent = None
         
-        # actor mailbox 
-        self._mailbox = None
+        # actor inbox 
+        self.inbox = None
         
         # children dictionary
         self._children = dict()
         
-        # used for checking if actor started or not
-        self._started = False
+        # used for checking if actor is waiting messages or not
+        self._waiting = False
+
+        # used for checking if actor is processing 
+        self._processing = False
         
         # postbox, used for sending messages to another actors
         self._postbox = None
@@ -60,6 +63,18 @@ class Actor(object):
         ''' represent actor as string
         '''
         return u'%(class)s (%(address)s)' % {u'class': self.__class__.__name__, u'address': self.address }    
+
+    @property
+    def waiting(self):
+        ''' return True if actor is waiting for new messages
+        '''
+        return self._waiting
+
+    @property
+    def processing(self):
+        ''' return True if actor is processing 
+        '''
+        return self._processing
 
     def add_child(self, actor):
         ''' add actor's child
@@ -113,22 +128,32 @@ class Actor(object):
             return [actor for actor in self.children if actor.__class__.__name__ == actor_class_name]
         
         return self.children    
-
-    @property
-    def started(self):
-        ''' return True if actor is started
+    
+    def start(self):
+        ''' start actor
         '''
-        return self._started 
-        
+        self._waiting = True
+        self._processing = True
+        if len(self.children) > 0:
+            self.supervise()
+        else:
+            self.loop()
+
+    def stop(self):
+        ''' stop actor
+        '''
+        self._processing = False
+        self._waiting = False
+
     def run(self):
         ''' run actor
         '''
-        pass
-
+        raise RuntimeError('Actor.run() is not implemented')
+        
     def run_once(self):
-        ''' run actor once
+        ''' run actor for one iteraction
         '''
-        pass
+        raise RuntimeError('Actor.run_once() is not implemented')
 
     def send(self, address, message):
         ''' send message to actor
@@ -138,8 +163,13 @@ class Actor(object):
     def loop(self):
         ''' mail loop 
         '''
-        pass
-    
+        raise RuntimeError('Actor.loop() is not implemented')
+
+    def supervise(self):
+        ''' actor supervise
+        '''
+        raise RuntimeError('Actor.supervise() is not implemented')
+            
 class  ActorSystem(Actor):
     ''' Actor System
     '''

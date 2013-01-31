@@ -14,7 +14,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_create(self):
 
         actor = pyactors.Actor()
-        self.assertFalse(actor.started)
+        self.assertFalse(actor.processing)
         self.assertIsNotNone(actor)
 
     def test_actors_address(self):
