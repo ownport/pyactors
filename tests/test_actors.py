@@ -103,4 +103,19 @@ class ActorTest(unittest.TestCase):
         self.assertEqual(len(parent.find(actor_name='Child-TestActor')), 10)
         for actor in children:
             parent.remove_child(actor.address)    
-            
+
+    def test_actors_find_childs_of_grandparents(self):
+    
+        grandparent = pyactors.Actor(name='grandparent')
+        for _ in range(3):
+            grandparent.add_child(pyactors.Actor(name='parent'))
+        for parent in grandparent.children:
+            for _ in range(2):
+                parent.add_child(pyactors.Actor(name='child'))            
+        self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='grandparent')), 1)
+        self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='parent')), 3)
+        self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='child')), 2)
+        
+        
+
+        

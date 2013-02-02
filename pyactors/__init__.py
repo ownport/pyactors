@@ -62,7 +62,7 @@ class Actor(object):
     def __str__(self):
         ''' represent actor as string
         '''
-        return u'%(name)s/%(address)s' % {u'name': self._name, u'address': self.address }    
+        return u'%(name)s[%(address)s]' % {u'name': self._name, u'address': self.address }    
 
     @property
     def waiting(self):
@@ -116,33 +116,32 @@ class Actor(object):
         
         return existing actors by criterias.
         """
-        children = list()
-        
-        if address and isinstance(address, (str, unicode)):
-            children.extend([actor for actor in self.children if actor.address == address])
-            if self.parent:
-                children.extend(self.parent.find(address=address))
-            return children
-            
-        if address and isinstance(address, (list, tuple)):
-            children.extend([actor for actor in self.children if actor.address in address])
-            if self.parent:
-                children.extend(self.parent.find(address=address))
-            return children
-            
+        known_actors = list()
+        known_actors.extend(self.children)
+        if self.parent:
+            known_actors.append(self.parent)
+            known_actors.extend(self.parent.find(address, actor_class, actor_name))
+        known_actors = list(set(known_actors))
+        result = list()
+
+        if address:
+            # when address is only one
+            if isinstance(address, (str, unicode)):
+                result.extend([actor for actor in known_actors if actor.address == address])
+            # when address if multiple
+            elif isinstance(address, (list, tuple)):
+                result.extend([actor for actor in known_actors if actor.address in address])
+            return result
+                                
         if actor_class:
-            children.extend([actor for actor in self.children if isinstance(actor, actor_class)])
-            if self.parent:
-                children.extend(self.parent.find(actor_class=actor_class))
-            return children
+            result.extend([actor for actor in known_actors if isinstance(actor, actor_class)])
+            return result
         
         if actor_name:
-            children.extend([actor for actor in self.children if actor._name == actor_name])
-            if self.parent:
-                children.extend(self.parent.find(actor_name=actor_name))
-            return children
+            result.extend([actor for actor in known_actors if actor._name == actor_name])
+            return result
         
-        return self.children.values()  
+        return known_actors
     
     def start(self):
         ''' start actor
