@@ -36,24 +36,12 @@ class GeneratorActor(Actor):
         
         # inbox
         self.inbox = Inbox()
-        
-        # actor processing loop 
-        self.processing_loop = None
-        
-        # actor supervise loop
-        self.supervise_loop = None
 
     def start(self):
         ''' start actor
         '''
-        self._waiting = True
-        self._processing = True
-        
+        super(GeneratorActor, self).start()
         if len(self.children) > 0:
-            # start child-actors
-            for child in self.children:
-                child.start()
-
             self.supervise_loop = self.supervise()
         else:
             self.processing_loop = self.loop()

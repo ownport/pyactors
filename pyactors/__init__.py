@@ -58,7 +58,13 @@ class Actor(object):
 
         # used for checking if actor is processing 
         self._processing = False
+
+        # actor processing loop 
+        self.processing_loop = None
         
+        # actor supervise loop
+        self.supervise_loop = None
+
     def __str__(self):
         ''' represent actor as string
         '''
@@ -148,10 +154,11 @@ class Actor(object):
         '''
         self._waiting = True
         self._processing = True
+        
         if len(self.children) > 0:
-            self.supervise()
-        else:
-            self.loop()
+            # start child-actors
+            for child in self.children:
+                child.start()
 
     def stop(self):
         ''' stop actor
