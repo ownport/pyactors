@@ -36,7 +36,10 @@ class Actor(object):
         ''' __init__
         '''
         # actor name
-        self._name = name
+        if not name:
+            self._name = self.__class__.__name__
+        else:
+            self._name = name
         
         # actor address
         self.address = uuid.uuid4().hex
@@ -62,7 +65,7 @@ class Actor(object):
     def __str__(self):
         ''' represent actor as string
         '''
-        return u'%(class)s (%(address)s)' % {u'class': self.__class__.__name__, u'address': self.address }    
+        return u'%(name)s (%(address)s)' % {u'name': self._name, u'address': self.address }    
 
     @property
     def waiting(self):
@@ -98,7 +101,7 @@ class Actor(object):
         '''
         return self._children.values()
 
-    def find(self, address=None, actor_class=None, actor_class_name=None):
+    def find(self, address=None, actor_class=None, actor_name=None):
         """ find children by criterias 
         
         - if no criterias are defined, return all children addresses
@@ -110,8 +113,8 @@ class Actor(object):
         existing actors of the given class, or of any subclass of the given class.
         - if actor_class is defined as list or tuple, return actors by thier actor classes.
         
-        - if actor_class_name is defined, return the list of all existing actors of 
-        the given class name.
+        - if actor_name is defined, return the list of all existing actors of 
+        the given name.
         
         return existing actors by criterias.
         """
@@ -124,8 +127,8 @@ class Actor(object):
         if actor_class:
             return [actor for actor in self.children if isinstance(actor, actor_class)]
         
-        if actor_class_name:
-            return [actor for actor in self.children if actor.__class__.__name__ == actor_class_name]
+        if actor_name:
+            return [actor for actor in self.children if actor._name == actor_name]
         
         return self.children    
     

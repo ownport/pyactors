@@ -64,25 +64,43 @@ class ActorTest(unittest.TestCase):
         self.assertEqual(len(parent.find(actor_class=pyactors.Actor)), 1)
         parent.remove_child(child.address)
 
-    def test_actors_find_child_by_actor_class_name(self):
-        
+    def test_actors_find_child_by_actor_name(self):
+
+        # name is not defined        
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
-        self.assertEqual(len(parent.find(actor_class_name='Actor')), 1)
+        self.assertEqual(len(parent.find(actor_name='Actor')), 1)
         parent.remove_child(child.address)
+
+        # name is defined        
+        parent = pyactors.Actor(name='Parent')
+        child = pyactors.Actor(name='Child')
+        parent.add_child(child)
+        self.assertEqual(len(parent.find(actor_name='Child')), 1)
+        parent.remove_child(child.address)
+
             
-    def test_actors_find_child_by_actor_class_names(self):
+    def test_actors_find_child_by_actor_names(self):
 
         class TestActor(pyactors.Actor):
             pass
         
+        # name is not defined        
         parent = pyactors.Actor()
         children = [TestActor() for _ in range(10)]
         for actor in children:
             parent.add_child(actor)
-        self.assertEqual(len(parent.find(actor_class_name='TestActor')), 10)
+        self.assertEqual(len(parent.find(actor_name='TestActor')), 10)
         for actor in children:
             parent.remove_child(actor.address)    
             
+        # name is defined        
+        parent = pyactors.Actor(name='Parent')
+        children = [TestActor(name='Child-TestActor') for _ in range(10)]
+        for actor in children:
+            parent.add_child(actor)
+        self.assertEqual(len(parent.find(actor_name='Child-TestActor')), 10)
+        for actor in children:
+            parent.remove_child(actor.address)    
             
