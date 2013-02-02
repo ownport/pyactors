@@ -22,37 +22,9 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-import collections
 from pyactors import Actor
+from pyactors.inboxes import DequeInbox as Inbox
 from pyactors.exceptions import EmptyInboxException
-
-class Inbox(object):
-    ''' Inbox from collections.deque
-    '''
-    def __init__(self):
-        ''' __init__ 
-        '''
-        super(Inbox, self).__init__()
-        self.__inbox = collections.deque()
-                    
-    def get(self):
-        ''' get data from inbox 
-        '''
-        try:
-            result = self.__inbox.popleft()
-        except IndexError:
-            raise EmptyInboxException
-        return result
-    
-    def put(self, message):
-        ''' put message to inbox 
-        '''
-        self.__inbox.append(message)
-    
-    def __len__(self):
-        ''' return length of inbox
-        '''
-        return len(self.__inbox)
 
 class GeneratorActor(Actor):
     ''' Generator Actor
