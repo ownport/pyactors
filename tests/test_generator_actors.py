@@ -28,16 +28,31 @@ class TestActor(GeneratorActor):
                 break
         self.stop()
 
-class SampleActor(GeneratorActor):
-    ''' SampleActor
+class SenderActor(GeneratorActor):
+    ''' Sender Actor
     '''
+    def loop(self):
+        for actor in self.find(actor_name='Receiver'):
+            actor.send('message from sender')
+        self.stop()
+
+class ReceiverActor(GeneratorActor):
+    ''' ReceiverActor
+    '''
+    def __init__(self, name=None):
+        super(ReceiverActor, self).__init__(name=name)
+        self.message = None
+        
     def loop(self):
         while self.processing:
             try:
-                message = self.inbox.get()    
+                self.message = self.inbox.get()    
             except EmptyInboxException:
                 self._waiting = True
-            break
+                yield
+                
+            if self.message:
+                break
         self.stop()
 
 
@@ -100,11 +115,15 @@ class GeneratorActorTest(unittest.TestCase):
         ''' test_actors_send_msg_between_actors
         '''        
         parent = GeneratorActor()      
-        parent.add_child(SampleActor())      
-        parent.add_child(SampleActor())      
+        parent.add_child(SenderActor(name='Sender'))      
+        parent.add_child(ReceiverActor(name='Receiver'))      
         parent.start()
         parent.run()
-        parent.stop()        
+        parent.stop()       
+        self.assertEqual(
+                [actor.message for actor in parent.find(actor_name='Receiver')],
+                ['message from sender']
+        ) 
 
 
 

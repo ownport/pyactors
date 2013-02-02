@@ -45,7 +45,7 @@ class Actor(object):
         self.address = uuid.uuid4().hex
         
         # actor's parent
-        self._parent = None
+        self.parent = None
         
         # actor inbox 
         self.inbox = None
@@ -59,13 +59,10 @@ class Actor(object):
         # used for checking if actor is processing 
         self._processing = False
         
-        # postbox, used for sending messages to another actors
-        self._postbox = None
-
     def __str__(self):
         ''' represent actor as string
         '''
-        return u'%(name)s (%(address)s)' % {u'name': self._name, u'address': self.address }    
+        return u'%(name)s/%(address)s' % {u'name': self._name, u'address': self.address }    
 
     @property
     def waiting(self):
@@ -83,6 +80,7 @@ class Actor(object):
         ''' add actor's child
         '''
         if actor.address not in self.children:
+            actor.parent = self
             self._children[actor.address] = actor
         else:
             raise RuntimeError('Actor exists: %s', actor)
@@ -118,19 +116,33 @@ class Actor(object):
         
         return existing actors by criterias.
         """
+        children = list()
+        
         if address and isinstance(address, (str, unicode)):
-            return [actor for actor in self.children if actor.address == address]
+            children.extend([actor for actor in self.children if actor.address == address])
+            if self.parent:
+                children.extend(self.parent.find(address=address))
+            return children
             
         if address and isinstance(address, (list, tuple)):
-            return [actor for actor in self.children if actor.address in address]
+            children.extend([actor for actor in self.children if actor.address in address])
+            if self.parent:
+                children.extend(self.parent.find(address=address))
+            return children
             
         if actor_class:
-            return [actor for actor in self.children if isinstance(actor, actor_class)]
+            children.extend([actor for actor in self.children if isinstance(actor, actor_class)])
+            if self.parent:
+                children.extend(self.parent.find(actor_class=actor_class))
+            return children
         
         if actor_name:
-            return [actor for actor in self.children if actor._name == actor_name]
+            children.extend([actor for actor in self.children if actor._name == actor_name])
+            if self.parent:
+                children.extend(self.parent.find(actor_name=actor_name))
+            return children
         
-        return self.children    
+        return self.children.values()  
     
     def start(self):
         ''' start actor
@@ -158,10 +170,10 @@ class Actor(object):
         '''
         raise RuntimeError('Actor.run_once() is not implemented')
 
-    def send(self, address, message):
+    def send(self, message):
         ''' send message to actor
         '''
-        self._postbox.send(address, message)
+        self.inbox.put(message)
 
     def loop(self):
         ''' mail loop 
