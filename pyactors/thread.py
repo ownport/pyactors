@@ -37,8 +37,7 @@ class ThreadedGeneratorActor(GeneratorActor):
         '''
         super(ThreadedGeneratorActor, self).start()
 
-        self._thread = threading.Thread(target=self.run)
-        self._thread.name = self._name
+        self._thread = threading.Thread(name=self._name, target=self.run)
         self._thread.daemon = True
         self._thread.start()
 
