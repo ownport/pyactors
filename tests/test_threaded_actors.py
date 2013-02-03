@@ -79,7 +79,7 @@ class ReceiverActor(GeneratorActor):
             try:
                 self.message = self.inbox.get()    
             except EmptyInboxException:
-                self._waiting = True
+                self.waiting = True
                 yield
                 
             if self.message:
@@ -106,7 +106,7 @@ class ThreadedReceiverActor(ThreadedGeneratorActor):
             try:
                 self.message = self.inbox.get()    
             except EmptyInboxException:
-                self._waiting = True
+                self.waiting = True
                 yield
                 
             if self.message:

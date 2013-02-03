@@ -29,4 +29,34 @@ class ForkedGenActor(ForkedGeneratorActor):
                 break
         self.stop()
 
+class ForkedGreenActor(ForkedGreenletActor):
+    ''' Forked Greenlet Actor
+    '''
+    def __init__(self):
+        super(ForkedGreenActor, self).__init__()
+        self.result = 0
+    
+    def loop(self):
+        for i in xrange(10):
+            if self.processing:
+                self.result += i
+                yield
+            else:
+                break
+        self.stop()
 
+class ForkedGeneratorActorTest(unittest.TestCase):
+
+    def test_actors_run(self):
+        ''' test_actors_run
+        '''
+        '''
+        _logger.debug('ForkedGeneratorActorTest.test_actors_run()')
+        actor = ForkedGenActor()
+        actor.start()
+        while actor.processing:
+            time.sleep(0.1)
+        self.assertEqual(actor.result, 45)
+        self.assertEqual(actor.processing, False)
+        self.assertEqual(actor.waiting, False)
+        '''

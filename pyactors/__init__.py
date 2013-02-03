@@ -79,11 +79,29 @@ class Actor(object):
         '''
         return self._waiting
 
+    @waiting.setter
+    def waiting(self, value):
+        ''' set waiting status 
+        '''
+        if isinstance(value, bool):
+            self._waiting = value
+        else:
+            raise RuntimeError('Incorrect waiting type, %s. It must be boolean' % value)
+
     @property
     def processing(self):
         ''' return True if actor is processing 
         '''
         return self._processing
+
+    @processing.setter
+    def processing(self, value):
+        ''' set processing status 
+        '''
+        if isinstance(value, bool):
+            self._processing = value
+        else:
+            raise RuntimeError('Incorrect processing type, %s. It must be boolean' % value)
 
     def add_child(self, actor):
         ''' add actor's child
@@ -155,8 +173,8 @@ class Actor(object):
     def start(self):
         ''' start actor
         '''
-        self._waiting = True
-        self._processing = True
+        self.waiting = True
+        self.processing = True
         
         if len(self.children) > 0:
             # start child-actors
@@ -166,8 +184,8 @@ class Actor(object):
     def stop(self):
         ''' stop actor
         '''
-        self._processing = False
-        self._waiting = False
+        self.processing = False
+        self.waiting = False
 
     def run(self):
         ''' run actor

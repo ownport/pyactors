@@ -22,9 +22,11 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
+
 import logging
 _logger = logging.getLogger('pyactors.thread')
 
+from multiprocessing import Process
 from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
 
@@ -36,6 +38,10 @@ class ForkedGeneratorActor(GeneratorActor):
         '''
         super(ForkedGeneratorActor, self).start()
 
+        self._process = Process(name=self._name,target=self.run)
+        self._process.daemon = False
+        self._process.start()
+
 class ForkedGreenletActor(GeneratorActor):
     ''' Forked GreenletActor
     '''        
@@ -43,4 +49,8 @@ class ForkedGreenletActor(GeneratorActor):
         ''' start actor
         '''
         super(ForkedGreenletActor, self).start()
+
+        self._process = Process(name=self._name, target=self.run)
+        self._process.daemon = False
+        self._process.start()
 
