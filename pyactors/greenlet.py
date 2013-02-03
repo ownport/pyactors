@@ -1,5 +1,5 @@
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
-__version__ = '0.1-concept'
+__version__ = '0.2'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -29,7 +29,6 @@ _logger = logging.getLogger('pyactors.greenlet')
 
 from pyactors import Actor
 from pyactors.inboxes import DequeInbox as Inbox
-from pyactors.exceptions import EmptyInboxException
 
 class GreenletActor(Actor):
     ''' Greenlet Actor
