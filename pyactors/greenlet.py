@@ -76,7 +76,7 @@ class GreenletActor(Actor):
         else:
             self.stop()
             return False
-        
+
     def run(self):
         ''' run actor
         '''
@@ -94,7 +94,7 @@ class GreenletActor(Actor):
                     child.run_once()
                 else:
                     stopped_children += 1
-                yield
+                self.sleep()
             
             if len(self.children) == stopped_children:
                 break

@@ -22,6 +22,10 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
+import logging
+
+_logger = logging.getLogger('pyactors.generator')
+
 from pyactors import Actor
 from pyactors.inboxes import DequeInbox as Inbox
 from pyactors.exceptions import EmptyInboxException
@@ -62,7 +66,7 @@ class GeneratorActor(Actor):
             except StopIteration:
                 self.supervise_loop = None
                 
-        if self.processing_loop or self.supervise_loop:
+        if self.processing_loop is not None or self.supervise_loop is not None:
             return True
         else:
             self.stop()
@@ -74,7 +78,7 @@ class GeneratorActor(Actor):
         while self.processing:
             if not self.run_once():
                 break
-            
+
     def supervise(self):        
         ''' supervise loop
         '''
@@ -82,10 +86,7 @@ class GeneratorActor(Actor):
             stopped_children = 0
             for child in self.children:
                 if child.processing:
-                    try:
-                        child.run_once()
-                    except StopIteration:
-                        pass
+                    child.run_once()
                 else:
                     stopped_children += 1
                 yield

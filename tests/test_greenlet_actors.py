@@ -27,6 +27,33 @@ class TestActor(GreenletActor):
                 break
         self.stop()
 
+class SenderActor(GreenletActor):
+    ''' Sender Actor
+    '''
+    def loop(self):
+        for actor in self.find(actor_name='Receiver'):
+            actor.send('message from sender')
+        self.stop()
+
+class ReceiverActor(GreenletActor):
+    ''' ReceiverActor
+    '''
+    def __init__(self, name=None):
+        super(ReceiverActor, self).__init__(name=name)
+        self.message = None
+        
+    def loop(self):
+        while self.processing:
+            try:
+                self.message = self.inbox.get()    
+            except EmptyInboxException:
+                self._waiting = True
+                self.sleep()
+                
+            if self.message:
+                break
+        self.stop()
+
 class GeventActorTest(unittest.TestCase):
 
     def test_actors_run(self):
@@ -67,5 +94,32 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
+
+    def test_actors_processing_with_diff_timelife_children(self):
+        ''' test_actors_processing_with_diff_timelife_children
+        '''    
+        parent = GreenletActor()      
+        for i in range(5):
+            parent.add_child(TestActor(iters=i))      
+        parent.start()
+        parent.run()
+        self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
+        self.assertEqual(parent.run_once(), False)
+        self.assertEqual(parent.processing, False)
+        self.assertEqual(parent.waiting, False)
+        
+    def test_actors_send_msg_between_actors(self):
+        ''' test_actors_send_msg_between_actors
+        '''        
+        parent = GreenletActor()      
+        parent.add_child(SenderActor(name='Sender'))      
+        parent.add_child(ReceiverActor(name='Receiver'))      
+        parent.start()
+        parent.run()
+        parent.stop()       
+        self.assertEqual(
+                [actor.message for actor in parent.find(actor_name='Receiver')],
+                ['message from sender']
+        ) 
 
     
