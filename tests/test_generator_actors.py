@@ -28,19 +28,19 @@ class TestActor(GeneratorActor):
                 break
         self.stop()
 
-class SenderActor(GeneratorActor):
-    ''' Sender Actor
+class Sender(GeneratorActor):
+    ''' Sender
     '''
     def loop(self):
         for actor in self.find(actor_name='Receiver'):
             actor.send('message from sender')
         self.stop()
 
-class ReceiverActor(GeneratorActor):
-    ''' ReceiverActor
+class Receiver(GeneratorActor):
+    ''' Receiver
     '''
     def __init__(self, name=None):
-        super(ReceiverActor, self).__init__(name=name)
+        super(Receiver, self).__init__(name=name)
         self.message = None
         
     def loop(self):
@@ -115,11 +115,10 @@ class GeneratorActorTest(unittest.TestCase):
         ''' test_actors_send_msg_between_actors
         '''        
         parent = GeneratorActor()      
-        parent.add_child(SenderActor(name='Sender'))      
-        parent.add_child(ReceiverActor(name='Receiver'))      
+        parent.add_child(Sender(name='Sender'))      
+        parent.add_child(Receiver(name='Receiver'))      
         parent.start()
         parent.run()
-        parent.stop()       
         self.assertEqual(
                 [actor.message for actor in parent.find(actor_name='Receiver')],
                 ['message from sender']
