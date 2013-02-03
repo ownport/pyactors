@@ -23,18 +23,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import gevent 
+import logging
+
+_logger = logging.getLogger('pyactors.greenlet')
 
 from pyactors import Actor
 from pyactors.inboxes import DequeInbox as Inbox
 from pyactors.exceptions import EmptyInboxException
 
-class GeventActor(Actor):
-    ''' Generator Actor
+class GreenletActor(Actor):
+    ''' Greenlet Actor
     '''
     def __init__(self, name=None):
         ''' __init__
         '''
-        super(GeventActor, self).__init__(name)
+        super(GreenletActor, self).__init__(name)
         
         # inbox
         self.inbox = Inbox()
@@ -42,34 +45,33 @@ class GeventActor(Actor):
     def sleep(self, timeout=0):
         ''' actor sleep for timeout
         '''
-        _gevent.sleep(timeout)
+        gevent.sleep(timeout)
 
     def start(self):
         ''' start actor
         '''
-        super(GeventActor, self).start()
+        super(GreenletActor, self).start()
         if len(self.children) > 0:
-            self.supervise_loop = gevent.spawn(self.supervise, self)
+            self.supervise_loop = gevent.spawn(self.supervise)
         else:
-            self.processing_loop = gevent.spawn(self.loop, self)
+            self.processing_loop = gevent.spawn(self.loop)
         
     def run_once(self):
         ''' one actor iteraction (processing + supervising)
         '''
         # processing
-        if self.processing_loop:
-            try:
-                self.processing_loop.next()   
-            except StopIteration:
-                self.processing_loop = None
+        if self.processing_loop is not None:
+            self.sleep()
+            if self.processing_loop.ready():
+                self.processing_loop = None               
+
         # children supervising    
-        if self.supervise_loop:
-            try:
-                self.supervise_loop.next()         
-            except StopIteration:
+        if self.supervise_loop is not None:
+            self.sleep()
+            if self.supervise_loop.ready():
                 self.supervise_loop = None
                 
-        if self.processing_loop or self.supervise_loop:
+        if self.processing_loop is not None or self.supervise_loop is not None:
             return True
         else:
             self.stop()
@@ -80,5 +82,20 @@ class GeventActor(Actor):
         '''
         while self.processing:
             if not self.run_once():
+                break
+
+    def supervise(self):        
+        ''' supervise loop
+        '''
+        while True:
+            stopped_children = 0
+            for child in self.children:
+                if child.processing:
+                    child.run_once()
+                else:
+                    stopped_children += 1
+                yield
+            
+            if len(self.children) == stopped_children:
                 break
     

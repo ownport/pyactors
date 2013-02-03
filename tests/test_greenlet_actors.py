@@ -40,4 +40,32 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(actor.run_once(), False)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
+
+    def test_actors_stop_in_the_middle(self):
+        ''' test_actors_stop_in_the_middle
+        '''  
+        actor = TestActor()
+        actor.start()
+        self.assertEqual(actor.processing, True)
+        for _ in range(5):
+            actor.run_once()
+        actor.stop()
+        self.assertEqual(actor.result, 10)
+        self.assertEqual(actor.run_once(), False)
+        self.assertEqual(actor.processing, False)
+        self.assertEqual(actor.waiting, False)
+
+    def test_actors_processing_with_children(self):
+        ''' test_actors_processing_with_children
+        '''    
+        parent = GreenletActor()      
+        for _ in range(5):
+            parent.add_child(TestActor())      
+        parent.start()
+        parent.run()
+        self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
+        self.assertEqual(parent.run_once(), False)
+        self.assertEqual(parent.processing, False)
+        self.assertEqual(parent.waiting, False)
+
     
