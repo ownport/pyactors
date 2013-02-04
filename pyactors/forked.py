@@ -26,6 +26,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 import logging
 _logger = logging.getLogger('pyactors.thread')
 
+from multiprocessing import Event
 from multiprocessing import Process
 from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
@@ -33,6 +34,53 @@ from pyactors.generator import GeneratorActor
 class ForkedGeneratorActor(GeneratorActor):
     ''' Forked GeneratorActor
     '''        
+    def __init__(self, name=None):
+        ''' __init__
+        '''
+        super(ForkedGeneratorActor,self).__init__(name=name)
+        
+        self._processing = Event()
+        self._waiting = Event()
+
+    @property
+    def processing(self):
+        ''' return True if actor is processing 
+        '''
+        if self._processing.is_set():
+            return True
+        return False
+
+    @processing.setter
+    def processing(self, value):
+        ''' set processing status 
+        '''
+        if not isinstance(value, bool):
+            raise RuntimeError('Incorrect processing type, %s. It must be boolean' % value)
+        if value:        
+            self._processing.set()
+        else:
+            self._processing.clear()
+
+    @property
+    def waiting(self):
+        ''' return True if actor is waiting for new messages
+        '''
+        if self._waiting.is_set():
+            return True
+        return False
+
+    @waiting.setter
+    def waiting(self, value):
+        ''' set waiting status 
+        '''
+        if not isinstance(value, bool):
+            raise RuntimeError('Incorrect waiting type, %s. It must be boolean' % value)
+        if value:        
+            self._waiting.set()
+        else:
+            self._waiting.clear()
+        
+                
     def start(self):
         ''' start actor
         '''
@@ -42,15 +90,78 @@ class ForkedGeneratorActor(GeneratorActor):
         self._process.daemon = False
         self._process.start()
 
-class ForkedGreenletActor(GeneratorActor):
+    def stop(self):
+        ''' stop actor
+        '''
+        if self.processing:
+            self.processing = False
+        if self.waiting:
+            self.waiting = False
+
+class ForkedGreenletActor(GreenletActor):
     ''' Forked GreenletActor
     '''        
+    def __init__(self, name=None):
+        ''' __init__
+        '''
+        super(ForkedGreenletActor,self).__init__(name=name)
+        
+        self._processing = Event()
+        self._waiting = Event()
+
+    @property
+    def processing(self):
+        ''' return True if actor is processing 
+        '''
+        if self._processing.is_set():
+            return True
+        return False
+
+    @processing.setter
+    def processing(self, value):
+        ''' set processing status 
+        '''
+        if not isinstance(value, bool):
+            raise RuntimeError('Incorrect processing type, %s. It must be boolean' % value)
+        if value:        
+            self._processing.set()
+        else:
+            self._processing.clear()
+
+    @property
+    def waiting(self):
+        ''' return True if actor is waiting for new messages
+        '''
+        if self._waiting.is_set():
+            return True
+        return False
+
+    @waiting.setter
+    def waiting(self, value):
+        ''' set waiting status 
+        '''
+        if not isinstance(value, bool):
+            raise RuntimeError('Incorrect waiting type, %s. It must be boolean' % value)
+        if value:        
+            self._waiting.set()
+        else:
+            self._waiting.clear()
+        
+                
     def start(self):
         ''' start actor
         '''
         super(ForkedGreenletActor, self).start()
 
-        self._process = Process(name=self._name, target=self.run)
+        self._process = Process(name=self._name,target=self.run)
         self._process.daemon = False
         self._process.start()
+
+    def stop(self):
+        ''' stop actor
+        '''
+        if self.processing:
+            self.processing = False
+        if self.waiting:
+            self.waiting = False
 
