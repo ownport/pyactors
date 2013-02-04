@@ -81,7 +81,7 @@ class GeneratorActor(Actor):
     def supervise(self):        
         ''' supervise loop
         '''
-        while True:
+        while self.processing:
             stopped_children = 0
             for child in self.children:
                 if child.processing:
