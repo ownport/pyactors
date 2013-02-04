@@ -151,7 +151,6 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
-        self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
@@ -166,7 +165,6 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
-        self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
