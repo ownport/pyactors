@@ -48,7 +48,7 @@ class GeneratorActor(Actor):
             self.supervise_loop = self.supervise()
         else:
             self.processing_loop = self.loop()
-        
+
     def run_once(self):
         ''' one actor iteraction (processing + supervising)
         '''
