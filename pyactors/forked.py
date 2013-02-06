@@ -42,6 +42,9 @@ class ForkedGeneratorActor(GeneratorActor):
         self._processing = Event()
         self._waiting = Event()
 
+        self._process = Process(name=self._name,target=self.run)
+        self._process.daemon = False
+
     @property
     def processing(self):
         ''' return True if actor is processing 
@@ -86,8 +89,6 @@ class ForkedGeneratorActor(GeneratorActor):
         '''
         super(ForkedGeneratorActor, self).start()
 
-        self._process = Process(name=self._name,target=self.run)
-        self._process.daemon = False
         self._process.start()
 
     def stop(self):

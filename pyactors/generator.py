@@ -39,6 +39,7 @@ class GeneratorActor(Actor):
         
         # inbox
         self.inbox = Inbox()
+        #self.logger = logging.getLogger('GeneratorActor')
 
     def start(self):
         ''' start actor

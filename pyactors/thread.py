@@ -40,6 +40,9 @@ class ThreadedGeneratorActor(GeneratorActor):
         self._processing = threading.Event()
         self._waiting = threading.Event()
 
+        self._thread = threading.Thread(name=self._name, target=self.run)
+        self._thread.daemon = True
+
     @property
     def processing(self):
         ''' return True if actor is processing 
@@ -84,8 +87,6 @@ class ThreadedGeneratorActor(GeneratorActor):
         '''
         super(ThreadedGeneratorActor, self).start()
         
-        self._thread = threading.Thread(name=self._name, target=self.run)
-        self._thread.daemon = True
         self._thread.start()
 
     def stop(self):
