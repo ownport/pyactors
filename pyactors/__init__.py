@@ -193,7 +193,7 @@ class Actor(object):
         raise RuntimeError('Actor.run() is not implemented')
         
     def run_once(self):
-        ''' run actor for one iteraction
+        ''' run actor for one iteraction (used by GeneratorActor and GreenletActor)
         '''
         raise RuntimeError('Actor.run_once() is not implemented')
 
