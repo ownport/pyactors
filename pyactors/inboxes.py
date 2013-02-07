@@ -24,6 +24,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import Queue
 import collections
+import multiprocessing
 from pyactors.exceptions import EmptyInboxException
 
 class DequeInbox(object):
@@ -75,6 +76,33 @@ class QueueInbox(object):
         ''' put message to inbox 
         '''
         self.__inbox.append(message)
+    
+    def __len__(self):
+        ''' return length of inbox
+        '''
+        return len(self.__inbox)
+
+class ProcessInbox(object):
+    ''' Inbox from multiprocessing.Queue
+    '''
+    def __init__(self):
+        ''' __init__ 
+        '''
+        self.__inbox = multiprocessing.Queue()
+                    
+    def get(self):
+        ''' get data from inbox 
+        '''
+        try:
+            result = self.__inbox.get_nowait()
+        except Queue.Empty:
+            raise EmptyInboxException
+        return result
+    
+    def put(self, message):
+        ''' put message to inbox 
+        '''
+        self.__inbox.put_nowait(message)
     
     def __len__(self):
         ''' return length of inbox
