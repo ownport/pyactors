@@ -2,38 +2,49 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
-import logging
 import unittest
+import logging
+_logger = logging.getLogger(__name__)
 
 from pyactors.greenlet import GreenletActor
 from pyactors.exceptions import EmptyInboxException
 
-_logger = logging.getLogger('test_gevent_actors')
 
 class TestActor(GreenletActor):
     ''' TestActor
     '''
-    def __init__(self, iters=10):
-        super(TestActor, self).__init__()
+    def __init__(self, name=None, iters=10):
+        super(TestActor, self).__init__(name=name)
         self.result = 0
         self.iters = iters
     
     def loop(self):
+        _logger.debug('%s.processing_loop(), started' % (self.name))
         for i in range(self.iters):
+            _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
             if self.processing:
                 self.result += i
-                self.sleep()
             else:
                 break
+            self.sleep()
         self.stop()
+        _logger.debug('%s.processing_loop(), completed' % (self.name))
 
 class SenderActor(GreenletActor):
     ''' Sender Actor
     '''
     def loop(self):
-        for actor in self.find(actor_name='Receiver'):
-            actor.send('message from sender')
+        _logger.debug('%s.processing_loop(), started' % (self.name))
+        receiver_founded = False
+        while self.processing:
+            for actor in self.find(actor_name='Receiver'):
+                _logger.debug('send msg to actor: %s' % actor)
+                actor.send('message from sender')
+                receiver_founded = True
+            if receiver_founded:
+                break
         self.stop()
+        _logger.debug('%s.processing_loop(), completed' % (self.name))
 
 class ReceiverActor(GreenletActor):
     ''' ReceiverActor
@@ -48,16 +59,17 @@ class ReceiverActor(GreenletActor):
                 self.message = self.inbox.get()    
             except EmptyInboxException:
                 self._waiting = True
-                self.sleep()
                 
             if self.message:
                 break
+            
+            self.sleep()
         self.stop()
 
 class GeventActorTest(unittest.TestCase):
 
     def test_actors_run(self):
-        ''' test_actors_run
+        ''' test_greenlet_actors.test_actors_run
         '''
         actor = TestActor()
         actor.start()
@@ -69,7 +81,7 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_stop_in_the_middle(self):
-        ''' test_actors_stop_in_the_middle
+        ''' test_greenlet_actors.test_actors_stop_in_the_middle
         '''  
         actor = TestActor()
         actor.start()
@@ -83,11 +95,11 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_processing_with_children(self):
-        ''' test_actors_processing_with_children
+        ''' test_greenlet_actors.test_actors_processing_with_children
         '''    
-        parent = GreenletActor()      
-        for _ in range(5):
-            parent.add_child(TestActor())      
+        parent = TestActor(name='ParentActor')      
+        for i in range(5):
+            parent.add_child(TestActor(name='ChildActor-%s' % i))      
         parent.start()
         parent.run()
         self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
@@ -96,22 +108,23 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(parent.waiting, False)
 
     def test_actors_processing_with_diff_timelife_children(self):
-        ''' test_actors_processing_with_diff_timelife_children
+        ''' test_greenlet_actors.test_actors_processing_with_diff_timelife_children
         '''    
-        parent = GreenletActor()      
+        parent = TestActor(name='ParentActor')      
         for i in range(5):
-            parent.add_child(TestActor(iters=i))      
+            parent.add_child(TestActor(name='ChildActor-%i' % i, iters=i))      
         parent.start()
         parent.run()
+        parent.stop()
         self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
     def test_actors_send_msg_between_actors(self):
-        ''' test_actors_send_msg_between_actors
+        ''' test_greenlet_actors.test_actors_send_msg_between_actors
         '''        
-        parent = GreenletActor()      
+        parent = TestActor(name='ParentActor')      
         parent.add_child(SenderActor(name='Sender'))      
         parent.add_child(ReceiverActor(name='Receiver'))      
         parent.start()
@@ -122,4 +135,6 @@ class GeventActorTest(unittest.TestCase):
                 ['message from sender']
         ) 
 
-    
+if __name__ == '__main__':
+    unittest.main()
+        

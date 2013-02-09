@@ -3,21 +3,20 @@ if '' not in sys.path:
     sys.path.append('')
 
 import time
-import logging
 import unittest
 
+import logging
+_logger = logging.getLogger(__name__)
+
 from pyactors.forked import ForkedGreenletActor
-from pyactors.exceptions import EmptyInboxException
 
 from multiprocessing import Manager
 
-_logger = logging.getLogger('test_forked_actors')
-
-class ForkedGreenActor(ForkedGreenletActor):
-    ''' Forked Greenlet Actor
+class TestActor(ForkedGreenletActor):
+    ''' Forked Greenlet Actor (test)
     '''
     def __init__(self):
-        super(ForkedGreenActor, self).__init__()
+        super(TestActor, self).__init__()
         self.result = Manager().Namespace()
         self.result.i = 0
     
@@ -33,10 +32,10 @@ class ForkedGreenActor(ForkedGreenletActor):
 class ForkedGreenletActorTest(unittest.TestCase):
 
     def test_actors_run(self):
-        ''' test_actors_run
+        ''' test_forked_green_actors.test_actors_run
         '''
         _logger.debug('ForkedGreenletActorTest.test_actors_run()')
-        actor = ForkedGreenActor()
+        actor = TestActor()
         actor.start()
         while actor.processing:
             time.sleep(0.1)
@@ -45,3 +44,5 @@ class ForkedGreenletActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
+if __name__ == '__main__':
+    unittest.main()

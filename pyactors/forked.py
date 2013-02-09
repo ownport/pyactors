@@ -24,10 +24,13 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 
 import logging
-_logger = logging.getLogger('pyactors.thread')
+_logger = logging.getLogger(__name__)
 
 from multiprocessing import Event
 from multiprocessing import Process
+
+from pyactors import AF_PROCESS
+from pyactors.inboxes import ProcessInbox as Inbox
 from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
 
@@ -39,6 +42,11 @@ class ForkedGeneratorActor(GeneratorActor):
         '''
         super(ForkedGeneratorActor,self).__init__(name=name)
         
+        # Actor Family
+        self._family = AF_PROCESS
+        
+        self.inbox = Inbox()
+        
         self._processing = Event()
         self._waiting = Event()
 
@@ -83,21 +91,12 @@ class ForkedGeneratorActor(GeneratorActor):
         else:
             self._waiting.clear()
         
-                
     def start(self):
         ''' start actor
         '''
         super(ForkedGeneratorActor, self).start()
 
         self._process.start()
-
-    def stop(self):
-        ''' stop actor
-        '''
-        if self.processing:
-            self.processing = False
-        if self.waiting:
-            self.waiting = False
 
 class ForkedGreenletActor(GreenletActor):
     ''' Forked GreenletActor
@@ -106,9 +105,17 @@ class ForkedGreenletActor(GreenletActor):
         ''' __init__
         '''
         super(ForkedGreenletActor,self).__init__(name=name)
+
+        # Actor Family
+        self._family = AF_PROCESS
+        
+        self.inbox = Inbox()
         
         self._processing = Event()
         self._waiting = Event()
+
+        self._process = Process(name=self._name,target=self.run)
+        self._process.daemon = False
 
     @property
     def processing(self):
@@ -148,21 +155,10 @@ class ForkedGreenletActor(GreenletActor):
         else:
             self._waiting.clear()
         
-                
     def start(self):
         ''' start actor
         '''
         super(ForkedGreenletActor, self).start()
 
-        self._process = Process(name=self._name,target=self.run)
-        self._process.daemon = False
         self._process.start()
-
-    def stop(self):
-        ''' stop actor
-        '''
-        if self.processing:
-            self.processing = False
-        if self.waiting:
-            self.waiting = False
 

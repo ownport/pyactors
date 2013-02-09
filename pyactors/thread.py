@@ -23,10 +23,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import logging
+_logger = logging.getLogger(__name__)
+
 import threading
 
-_logger = logging.getLogger('pyactors.thread')
-
+from pyactors import AF_THREAD
 from pyactors.generator import GeneratorActor
 
 class ThreadedGeneratorActor(GeneratorActor):
@@ -36,6 +37,9 @@ class ThreadedGeneratorActor(GeneratorActor):
         ''' __init__
         '''
         super(ThreadedGeneratorActor,self).__init__(name=name)
+        
+        # Actor Family
+        self._family = AF_THREAD
         
         self._processing = threading.Event()
         self._waiting = threading.Event()
@@ -88,13 +92,5 @@ class ThreadedGeneratorActor(GeneratorActor):
         super(ThreadedGeneratorActor, self).start()
         
         self._thread.start()
-
-    def stop(self):
-        ''' stop actor
-        '''
-        if self.processing:
-            self.processing = False
-        if self.waiting:
-            self.waiting = False
     
         

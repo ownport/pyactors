@@ -24,13 +24,18 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import uuid
 import logging
-
-_logger = logging.getLogger('pyactors')
+_logger = logging.getLogger(__name__)
 
 try:
     import settings
 except ImportError:
     pass    
+
+# Actor Family
+AF_GENERATOR    = 0
+AF_GREENLET     = 1
+AF_THREAD       = 2
+AF_PROCESS      = 3
 
 class Actor(object):
     ''' Base class for creation actors
@@ -43,6 +48,9 @@ class Actor(object):
             self._name = self.__class__.__name__
         else:
             self._name = name
+        
+        # actor family
+        self._family = None
         
         # actor address
         self.address = uuid.uuid4().hex
@@ -72,6 +80,20 @@ class Actor(object):
         ''' represent actor as string
         '''
         return u'%(name)s[%(address)s]' % {u'name': self._name, u'address': self.address }    
+
+    @property
+    def name(self):
+        ''' return actor name
+        '''
+        return self._name
+
+    @property
+    def family(self):
+        ''' return actor family
+        '''
+        if self._family is None:
+            raise RuntimeError('Actor family is not specified, %s' % self._name)
+        return self._family
 
     @property
     def waiting(self):
@@ -173,7 +195,7 @@ class Actor(object):
     def start(self):
         ''' start actor
         '''
-        self.waiting = True
+        self.waiting = False
         self.processing = True
         
         if len(self.children) > 0:
@@ -181,9 +203,26 @@ class Actor(object):
             for child in self.children:
                 child.start()
 
-    def stop(self):
-        ''' stop actor
+    def _stop_children(self):
+        ''' stop children
         '''
+        if len(self.children) == 0:
+            return
+        # stop child-actors
+        while True:
+            stopped_children = 0
+            for child in self.children:
+                if child.processing:
+                    child.stop()
+                else:
+                    stopped_children += 1
+            if stopped_children == len(self.children):
+                break
+
+    def stop(self):
+        ''' stop actor and its children
+        '''
+        self._stop_children()        
         self.processing = False
         self.waiting = False
 
@@ -207,10 +246,25 @@ class Actor(object):
         '''
         raise RuntimeError('Actor.loop() is not implemented')
 
-    def supervise(self):
-        ''' actor supervise
+    def supervise(self):        
+        ''' supervise loop
         '''
-        raise RuntimeError('Actor.supervise() is not implemented')
+        while self.processing:
+            stopped_children = 0
+            for child in self.children:
+                if child.processing:
+                    if child.family in (AF_GENERATOR, AF_GREENLET):
+                        child.run_once()
+                else:
+                    stopped_children += 1
+                    
+                if child.family == AF_GENERATOR:
+                    yield
+                elif child.family == AF_GREENLET:
+                    child.sleep()
+            
+            if len(self.children) == stopped_children:
+                break
             
 class  ActorSystem(Actor):
     ''' Actor System

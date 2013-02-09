@@ -23,10 +23,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import logging
-
-_logger = logging.getLogger('pyactors.generator')
+_logger = logging.getLogger(__name__)
 
 from pyactors import Actor
+from pyactors import AF_GENERATOR
 from pyactors.inboxes import DequeInbox as Inbox
 
 class GeneratorActor(Actor):
@@ -39,7 +39,9 @@ class GeneratorActor(Actor):
         
         # inbox
         self.inbox = Inbox()
-        #self.logger = logging.getLogger('GeneratorActor')
+        
+        # Actor Family
+        self._family = AF_GENERATOR
 
     def start(self):
         ''' start actor
@@ -77,21 +79,6 @@ class GeneratorActor(Actor):
         '''
         while self.processing:
             if not self.run_once():
-                break
-
-    def supervise(self):        
-        ''' supervise loop
-        '''
-        while self.processing:
-            stopped_children = 0
-            for child in self.children:
-                if child.processing:
-                    child.run_once()
-                else:
-                    stopped_children += 1
-                yield
-            
-            if len(self.children) == stopped_children:
                 break
                     
                 

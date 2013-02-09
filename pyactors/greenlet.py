@@ -25,9 +25,10 @@ POSSIBILITY OF SUCH DAMAGE."""
 import gevent 
 import logging
 
-_logger = logging.getLogger('pyactors.greenlet')
+_logger = logging.getLogger(__name__)
 
 from pyactors import Actor
+from pyactors import AF_GENERATOR, AF_GREENLET
 from pyactors.inboxes import DequeInbox as Inbox
 
 class GreenletActor(Actor):
@@ -36,10 +37,13 @@ class GreenletActor(Actor):
     def __init__(self, name=None):
         ''' __init__
         '''
-        super(GreenletActor, self).__init__(name)
+        super(GreenletActor, self).__init__(name=name)
         
         # inbox
         self.inbox = Inbox()
+        
+        # Actor Family
+        self._family = AF_GREENLET
 
     def sleep(self, timeout=0):
         ''' actor sleep for timeout
@@ -54,22 +58,31 @@ class GreenletActor(Actor):
             self.supervise_loop = gevent.spawn(self.supervise)
         else:
             self.processing_loop = gevent.spawn(self.loop)
+
+    def stop(self):
+        ''' stop actor
+        '''
+        super(GreenletActor, self).stop()
         
     def run_once(self):
         ''' one actor iteraction (processing + supervising)
         '''
+        self.sleep()
+        if not self.processing:
+            return False
+
         # processing
         if self.processing_loop is not None:
-            self.sleep()
+            #self.sleep()            
             if self.processing_loop.ready():
                 self.processing_loop = None               
-
+            
         # children supervising    
         if self.supervise_loop is not None:
-            self.sleep()
+            #self.sleep()
             if self.supervise_loop.ready():
                 self.supervise_loop = None
-                
+        
         if self.processing_loop is not None or self.supervise_loop is not None:
             return True
         else:
@@ -86,15 +99,14 @@ class GreenletActor(Actor):
     def supervise(self):        
         ''' supervise loop
         '''
-        while True:
+        while self.processing:
             stopped_children = 0
             for child in self.children:
                 if child.processing:
                     child.run_once()
                 else:
                     stopped_children += 1
-                self.sleep()
-            
+                    
             if len(self.children) == stopped_children:
                 break
-    
+

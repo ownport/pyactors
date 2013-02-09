@@ -3,14 +3,15 @@ if '' not in sys.path:
     sys.path.append('')
 
 import time
-import logging
 import unittest
+
+import logging
+_logger = logging.getLogger(__name__)
 
 from pyactors.generator import GeneratorActor
 from pyactors.thread import ThreadedGeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
-_logger = logging.getLogger('test_threaded_actors')
 
 class ThreadedActor(ThreadedGeneratorActor):
     ''' ThreadedActor
@@ -116,7 +117,7 @@ class ThreadedReceiverActor(ThreadedGeneratorActor):
 class ThreadedGeneratorActorTest(unittest.TestCase):
 
     def test_actors_run(self):
-        ''' test_actors_run
+        ''' test_threaded_actors.test_actors_run
         '''
         _logger.debug('ThreadedGeneratorActorTest.test_actors_run()')
         actor = ThreadedActor()
@@ -128,7 +129,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_stop_in_the_middle(self):
-        ''' test_actors_stop_in_the_middle
+        ''' test_threaded_actors.test_actors_stop_in_the_middle
         '''  
         _logger.debug('ThreadedGeneratorActorTest.test_actors_stop_in_the_middle')
         actor = LongRunningActor()
@@ -141,7 +142,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_processing_with_children(self):
-        ''' test_actors_processing_with_children
+        ''' test_threaded_actors.test_actors_processing_with_children
         '''    
         _logger.debug('ThreadedGeneratorActorTest.test_actors_processing_with_children')
         parent = ThreadedActor()      
@@ -155,7 +156,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         self.assertEqual(parent.waiting, False)
         
     def test_actors_processing_with_diff_timelife_children(self):
-        ''' test_actors_processing_with_diff_timelife_children
+        ''' test_threaded_actors.test_actors_processing_with_diff_timelife_children
         '''    
         _logger.debug('ThreadedGeneratorActorTest.test_actors_processing_with_diff_timelife_children')
         parent = ThreadedActor()      
@@ -170,7 +171,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         
 
     def test_actors_send_msg_between_actors(self):
-        ''' test_actors_send_msg_between_actors
+        ''' test_threaded_actors.test_actors_send_msg_between_actors
         '''        
         _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_actors')
         parent = ThreadedActor()      
@@ -186,7 +187,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         ) 
 
     def test_actors_threaded_actor_in_actor(self):
-        ''' test_actors_threaded_actor_in_actor
+        ''' test_threaded_actors.test_actors_threaded_actor_in_actor
         '''
         _logger.debug('ThreadedGeneratorActorTest.test_actors_threaded_actor_in_actor')
         parent = ThreadedActor()      
@@ -201,9 +202,24 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         self.assertEqual(parent.waiting, False)
 
     def test_actors_send_msg_between_threaded_actors(self):
-        ''' test_actors_send_msg_between_threaded_actors
+        ''' test_threaded_actors.test_actors_send_msg_between_threaded_actors
         '''        
         _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors')
+        parent = TestActor()      
+        parent.add_child(ThreadedSenderActor(name='Sender'))      
+        parent.add_child(ThreadedReceiverActor(name='Receiver'))      
+        parent.start()
+        parent.run()
+        parent.stop()       
+        self.assertEqual(
+                [actor.message for actor in parent.find(actor_name='Receiver')],
+                ['message from sender']
+        ) 
+
+    def test_actors_send_msg_between_threaded_actors_in_thread(self):
+        ''' test_threaded_actors.test_actors_send_msg_between_threaded_actors in thread
+        '''        
+        _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors_in_thread')
         parent = ThreadedActor()      
         parent.add_child(ThreadedSenderActor(name='Sender'))      
         parent.add_child(ThreadedReceiverActor(name='Receiver'))      

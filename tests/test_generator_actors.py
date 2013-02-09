@@ -3,13 +3,12 @@ if '' not in sys.path:
     sys.path.append('')
 
 import logging
+_logger = logging.getLogger(__name__)
+
 import unittest
 
 from pyactors.generator import GeneratorActor
 from pyactors.exceptions import EmptyInboxException
-
-_logger = logging.getLogger('test_generator_actors')
-
 
 class TestActor(GeneratorActor):
     ''' TestActor
@@ -59,7 +58,7 @@ class Receiver(GeneratorActor):
 class GeneratorActorTest(unittest.TestCase):
     
     def test_actors_run(self):
-        ''' test_actors_run
+        ''' test_generator_actors.test_actors_run
         '''
         actor = TestActor()
         actor.start()
@@ -71,7 +70,7 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_stop_in_the_middle(self):
-        ''' test_actors_stop_in_the_middle
+        ''' test_generator_actors.test_actors_stop_in_the_middle
         '''  
         actor = TestActor()
         actor.start()
@@ -85,7 +84,7 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.waiting, False)
 
     def test_actors_processing_with_children(self):
-        ''' test_actors_processing_with_children
+        ''' test_generator_actors.test_actors_processing_with_children
         '''    
         parent = GeneratorActor()      
         for _ in range(5):
@@ -98,7 +97,7 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(parent.waiting, False)
         
     def test_actors_processing_with_diff_timelife_children(self):
-        ''' test_actors_processing_with_diff_timelife_children
+        ''' test_generator_actors.test_actors_processing_with_diff_timelife_children
         '''    
         parent = GeneratorActor()      
         for i in range(5):
@@ -112,7 +111,7 @@ class GeneratorActorTest(unittest.TestCase):
         
 
     def test_actors_send_msg_between_actors(self):
-        ''' test_actors_send_msg_between_actors
+        ''' test_generator_actors.test_actors_send_msg_between_actors
         '''        
         parent = GeneratorActor()      
         parent.add_child(Sender(name='Sender'))      
