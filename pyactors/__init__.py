@@ -257,12 +257,11 @@ class Actor(object):
                         child.run_once()
                 else:
                     stopped_children += 1
-                    
-                if child.family == AF_GENERATOR:
-                    yield
-                elif child.family == AF_GREENLET:
+                
+                if child.family == AF_GREENLET:
                     child.sleep()
-            
+                yield
+
             if len(self.children) == stopped_children:
                 break
             

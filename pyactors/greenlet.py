@@ -55,7 +55,7 @@ class GreenletActor(Actor):
         '''
         super(GreenletActor, self).start()
         if len(self.children) > 0:
-            self.supervise_loop = gevent.spawn(self.supervise)
+            self.supervise_loop = self.supervise()
         else:
             self.processing_loop = gevent.spawn(self.loop)
 
@@ -78,11 +78,12 @@ class GreenletActor(Actor):
                 self.processing_loop = None               
             
         # children supervising    
-        if self.supervise_loop is not None:
-            #self.sleep()
-            if self.supervise_loop.ready():
+        if self.supervise_loop:
+            try:
+                self.supervise_loop.next()         
+            except StopIteration:
                 self.supervise_loop = None
-        
+
         if self.processing_loop is not None or self.supervise_loop is not None:
             return True
         else:
@@ -94,19 +95,5 @@ class GreenletActor(Actor):
         '''
         while self.processing:
             if not self.run_once():
-                break
-
-    def supervise(self):        
-        ''' supervise loop
-        '''
-        while self.processing:
-            stopped_children = 0
-            for child in self.children:
-                if child.processing:
-                    child.run_once()
-                else:
-                    stopped_children += 1
-                    
-            if len(self.children) == stopped_children:
                 break
 
