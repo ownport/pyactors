@@ -10,3 +10,8 @@ http://blog.pythonisito.com/2012/07/introduction-to-gevent.html
 http://blog.pythonisito.com/2012/07/gevent-threads-and-benchmarks.html
 - **gevent. For the Working Python Developer**, 
 http://sdiehl.github.com/gevent-tutorial/
+- **Actor Model (Wikipedia)**,
+http://en.wikipedia.org/wiki/Actor_model
+- **Actor model theory (Wikipedia)**,
+http://en.wikipedia.org/wiki/Actor_model_theory
+
