@@ -102,8 +102,7 @@ class ProcessInbox(object):
     def put(self, message):
         ''' put message to inbox 
         '''
-        if not self.__inbox.empty():
-            self.__inbox.put_nowait(message)
+        self.__inbox.put_nowait(message)
     
     def __len__(self):
         ''' return length of inbox
