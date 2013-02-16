@@ -10,7 +10,7 @@ import pyactors
 
 
 class ActorTest(unittest.TestCase):
-        
+
     def test_actors_create(self):
         ''' test_actors.test_actors_create
         '''
@@ -27,6 +27,29 @@ class ActorTest(unittest.TestCase):
         self.assertNotEqual(actor.address, None)
         self.assertTrue(type(actor.address) == str)
         self.assertEqual(len(actor.address), 32)
+
+    def test_actors_properties(self):
+        ''' test_actors.test_actors_properties
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_properties' % __name__)
+        actor = pyactors.Actor(name='test_actor')
+        self.assertTrue(isinstance(str(actor), str))
+        self.assertEqual(actor.name, 'test_actor')
+
+        try:
+            actor.family
+        except RuntimeError:
+            pass
+
+        try:
+            actor.waiting = 1
+        except RuntimeError:
+            pass
+
+        try:
+            actor.processing = 1
+        except RuntimeError:
+            pass
 
     def test_actors_run_not_implemented(self):
         ''' test_actors_run_not_implemented
