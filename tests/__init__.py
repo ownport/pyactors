@@ -2,10 +2,21 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
+import logging
+
 from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
+def file_logger(name, filename):
+    ''' returns file logger
+    '''
+    logger = logging.getLogger(name)
+    file_handler = logging.FileHandler(filename)
+    logger.addHandler(file_handler)
+    logger.setLevel(logging.DEBUG)
+    return logger
+    
 ''' 
 -------------------------------------------
 Generators
@@ -15,16 +26,18 @@ class TestGeneratorActor(GeneratorActor):
     ''' TestGeneratorActor
     '''
     def __init__(self, name=None, iters=10):
-        super(TestGeneratorActor, self).__init__()
-        self.result = 0
+        super(TestGeneratorActor, self).__init__(name=name)
         self.iters = iters
     
     def loop(self):
+        ''' loop
+        '''
+        result = 0
         for i in range(self.iters):
             if self.processing:
-                self.result += i
+                result += i
                 if self.parent is not None:
-                    self.parent.send(self.result)
+                    self.parent.send(result)
                 yield
             else:
                 break
@@ -41,9 +54,6 @@ class SenderGeneratorActor(GeneratorActor):
 class ReceiverGeneratorActor(GeneratorActor):
     ''' ReceiverGeneratorActor
     '''
-    def __init__(self, name=None):
-        super(ReceiverGeneratorActor, self).__init__(name=name)
-        
     def loop(self):
         while self.processing:
             try:
@@ -70,15 +80,17 @@ class TestGreenletActor(GreenletActor):
     '''
     def __init__(self, name=None, iters=10):
         super(TestGreenletActor, self).__init__(name=name)
-        self.result = 0
         self.iters = iters
     
     def loop(self):
+        ''' loop
+        '''
+        result = 0
         for i in range(self.iters):
             if self.processing:
-                self.result += i
+                result += i
                 if self.parent is not None:
-                    self.parent.send(self.result)
+                    self.parent.send(result)
             else:
                 break
             self.sleep()
@@ -102,16 +114,18 @@ class ReceiverGreenletActor(GreenletActor):
     '''
     def __init__(self, name=None):
         super(ReceiverGreenletActor, self).__init__(name=name)
-        self.message = None
         
     def loop(self):
+        ''' loop
+        '''
+        message = None
         while self.processing:
             try:
-                self.message = self.inbox.get()    
+                message = self.inbox.get()    
             except EmptyInboxException:
                 self._waiting = True
                 
-            if self.message:
+            if message:
                 break
             
             self.sleep()
