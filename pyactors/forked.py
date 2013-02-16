@@ -41,6 +41,7 @@ class ForkedGeneratorActor(GeneratorActor):
         ''' __init__
         '''
         super(ForkedGeneratorActor,self).__init__(name=name)
+        self._logger = logging.getLogger('%s.ForkedGeneratorActor' % __name__)
         
         # Actor Family
         self._family = AF_PROCESS
@@ -53,8 +54,6 @@ class ForkedGeneratorActor(GeneratorActor):
         self._process = Process(name=self._name,target=self.run)
         self._process.daemon = False
         
-        self._logger = logging.getLogger('%s.ForkedGeneratorActor' % __name__)
-
     @property
     def processing(self):
         ''' return True if actor is processing 
@@ -107,6 +106,7 @@ class ForkedGreenletActor(GreenletActor):
         ''' __init__
         '''
         super(ForkedGreenletActor,self).__init__(name=name)
+        self._logger = logging.getLogger('%s.ForkedGreenletActor' % __name__)
 
         # Actor Family
         self._family = AF_PROCESS
@@ -118,8 +118,6 @@ class ForkedGreenletActor(GreenletActor):
 
         self._process = Process(name=self._name,target=self.run)
         self._process.daemon = False
-
-        self._logger = logging.getLogger('%s.ForkedGreenletActor' % __name__)
 
     @property
     def processing(self):

@@ -228,6 +228,7 @@ class Actor(object):
                 if child.processing:
                     child.stop()
                 else:
+                    #self.remove_child(child.address)
                     stopped_children += 1
             if stopped_children == len(self.children):
                 break
@@ -265,6 +266,9 @@ class Actor(object):
         while self.processing:
             stopped_children = 0
             for child in self.children:
+                # child.processing is just a flag which give you information
+                # that the actor should be stopped but it's not a fact
+                # that the actor was stopped.
                 if child.processing:
                     if child.family in (AF_GENERATOR, AF_GREENLET):
                         child.run_once()
