@@ -38,14 +38,13 @@ class GreenletActor(Actor):
         ''' __init__
         '''
         super(GreenletActor, self).__init__(name=name)
+        self._logger = logging.getLogger('%s.GreenletActor' % __name__)
         
         # inbox
         self.inbox = Inbox()
         
         # Actor Family
         self._family = AF_GREENLET
-
-        self._logger = logging.getLogger('%s.GreenletActor' % __name__)
 
     def sleep(self, timeout=0):
         ''' actor sleep for timeout
@@ -70,17 +69,14 @@ class GreenletActor(Actor):
         ''' one actor iteraction (processing + supervising)
         '''
         self.sleep()
-        if not self.processing:
-            return False
 
         # processing
         if self.processing_loop is not None:
-            #self.sleep()            
             if self.processing_loop.ready():
                 self.processing_loop = None               
             
         # children supervising    
-        if self.supervise_loop:
+        if self.supervise_loop is not None:
             try:
                 self.supervise_loop.next()         
             except StopIteration:
