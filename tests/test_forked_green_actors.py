@@ -34,7 +34,7 @@ class ForkedGreenletActorTest(unittest.TestCase):
     def test_actors_run(self):
         ''' test_forked_green_actors.test_actors_run
         '''
-        _logger.debug('ForkedGreenletActorTest.test_actors_run()')
+        logger = logging.getLogger('%s.ForkedGreenletActorTest.test_actors_run' % __name__)
         actor = TestActor()
         actor.start()
         while actor.processing:

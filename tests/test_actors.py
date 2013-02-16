@@ -2,18 +2,19 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
+import logging
+logger = logging.getLogger(__name__)
+
 import unittest
 import pyactors
 
-import logging
-_logger = logging.getLogger(__name__)
-
 
 class ActorTest(unittest.TestCase):
-    
+        
     def test_actors_create(self):
         ''' test_actors.test_actors_create
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_create' % __name__)
         actor = pyactors.Actor()
         self.assertFalse(actor.processing)
         self.assertIsNotNone(actor)
@@ -21,6 +22,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_address(self):
         ''' test_actors.test_actors_address
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_address' % __name__)
         actor = pyactors.Actor()
         self.assertNotEqual(actor.address, None)
         self.assertTrue(type(actor.address) == str)
@@ -29,6 +31,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_add_remove_child(self):
         ''' test_actors.test_actors_add_remove_child
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_add_remove_child' % __name__)
         parent = pyactors.Actor()
         parent.add_child(pyactors.Actor())
         parent.add_child(pyactors.Actor())
@@ -42,6 +45,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_find_child_by_address(self):
         ''' test_actors.test_actors_find_child_by_address
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_address' % __name__)
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
@@ -51,6 +55,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_find_child_by_address_list(self):
         ''' test_actors.test_actors_find_child_by_address_list
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_address_list' % __name__)
         parent = pyactors.Actor()
         children = [pyactors.Actor() for _ in range(10)]
         addresses = list()
@@ -64,6 +69,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_find_child_by_actor_class(self):
         ''' test_actors.test_actors_find_child_by_actor_class
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_class' % __name__)
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
@@ -73,7 +79,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_find_child_by_actor_name(self):
         ''' test_actors.test_actors_find_child_by_actor_name
         '''
-        # name is not defined        
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_name' % __name__)
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
@@ -94,7 +100,7 @@ class ActorTest(unittest.TestCase):
         class TestActor(pyactors.Actor):
             pass
         
-        # name is not defined        
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_names' % __name__)
         parent = pyactors.Actor()
         children = [TestActor() for _ in range(10)]
         for actor in children:
@@ -115,6 +121,7 @@ class ActorTest(unittest.TestCase):
     def test_actors_find_childs_of_grandparents(self):
         ''' test_actors.test_actors_find_childs_of_grandparents
         '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_childs_of_grandparents' % __name__)
         grandparent = pyactors.Actor(name='grandparent')
         for _ in range(3):
             grandparent.add_child(pyactors.Actor(name='parent'))
@@ -126,5 +133,6 @@ class ActorTest(unittest.TestCase):
         self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='child')), 2)
         
         
-
+if __name__ == '__main__':
+    unittest.main()
         

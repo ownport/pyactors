@@ -43,6 +43,8 @@ class GeneratorActor(Actor):
         # Actor Family
         self._family = AF_GENERATOR
 
+        self._logger = logging.getLogger('%s.GeneratorActor' % __name__)
+
     def start(self):
         ''' start actor
         '''

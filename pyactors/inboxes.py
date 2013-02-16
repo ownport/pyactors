@@ -27,6 +27,9 @@ import collections
 import multiprocessing
 from pyactors.exceptions import EmptyInboxException
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class DequeInbox(object):
     ''' Inbox from collections.deque
     '''
@@ -34,6 +37,8 @@ class DequeInbox(object):
         ''' __init__ 
         '''
         self.__inbox = collections.deque()
+
+        self._logger = logging.getLogger('%s.DequeInbox' % __name__)
                     
     def get(self):
         ''' get data from inbox 
@@ -62,6 +67,8 @@ class QueueInbox(object):
         '''
         self.__inbox = Queue.Queue()
                     
+        self._logger = logging.getLogger('%s.QueueInbox' % __name__)
+
     def get(self):
         ''' get data from inbox 
         '''
@@ -90,6 +97,8 @@ class ProcessInbox(object):
         '''
         self.__inbox = multiprocessing.Queue()
                     
+        self._logger = logging.getLogger('%s.ProcessInbox' % __name__)
+
     def get(self):
         ''' get data from inbox 
         '''

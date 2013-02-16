@@ -24,6 +24,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import uuid
 import logging
+import logging.handlers
 _logger = logging.getLogger(__name__)
 
 try:
@@ -36,6 +37,16 @@ AF_GENERATOR    = 0
 AF_GREENLET     = 1
 AF_THREAD       = 2
 AF_PROCESS      = 3
+
+def network_logger( name=__name__, level=logging.DEBUG,
+                    host='127.0.0.1', port=logging.handlers.DEFAULT_TCP_LOGGING_PORT):
+    ''' return network logger
+    '''
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    socketHandler = logging.handlers.SocketHandler(host, port)
+    logger.addHandler(socketHandler)
+    return logger
 
 class Actor(object):
     ''' Base class for creation actors
@@ -75,6 +86,8 @@ class Actor(object):
         
         # actor supervise loop
         self.supervise_loop = None
+        
+        self._logger = logging.getLogger('%s.Actor' % __name__)
 
     def __str__(self):
         ''' represent actor as string

@@ -52,6 +52,8 @@ class ForkedGeneratorActor(GeneratorActor):
 
         self._process = Process(name=self._name,target=self.run)
         self._process.daemon = False
+        
+        self._logger = logging.getLogger('%s.ForkedGeneratorActor' % __name__)
 
     @property
     def processing(self):
@@ -116,6 +118,8 @@ class ForkedGreenletActor(GreenletActor):
 
         self._process = Process(name=self._name,target=self.run)
         self._process.daemon = False
+
+        self._logger = logging.getLogger('%s.ForkedGreenletActor' % __name__)
 
     @property
     def processing(self):

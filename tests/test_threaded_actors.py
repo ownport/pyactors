@@ -119,7 +119,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_run(self):
         ''' test_threaded_actors.test_actors_run
         '''
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_run()')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_run' % __name__)
         actor = ThreadedActor()
         actor.start()
         while actor.processing:
@@ -131,7 +131,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_stop_in_the_middle(self):
         ''' test_threaded_actors.test_actors_stop_in_the_middle
         '''  
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_stop_in_the_middle')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_stop_in_the_middle' % __name__)
         actor = LongRunningActor()
         actor.start()
         self.assertEqual(actor.processing, True)
@@ -144,7 +144,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_processing_with_children(self):
         ''' test_threaded_actors.test_actors_processing_with_children
         '''    
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_processing_with_children')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_processing_with_children' % __name__)
         parent = ThreadedActor()      
         for _ in range(5):
             parent.add_child(TestActor())      
@@ -158,7 +158,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_processing_with_diff_timelife_children(self):
         ''' test_threaded_actors.test_actors_processing_with_diff_timelife_children
         '''    
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_processing_with_diff_timelife_children')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_processing_with_diff_timelife_children' % __name__)
         parent = ThreadedActor()      
         for i in range(5):
             parent.add_child(TestActor(iters=i))      
@@ -173,7 +173,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_send_msg_between_actors(self):
         ''' test_threaded_actors.test_actors_send_msg_between_actors
         '''        
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_actors')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_send_msg_between_actors' % __name__)
         parent = ThreadedActor()      
         parent.add_child(SenderActor(name='Sender'))      
         parent.add_child(ReceiverActor(name='Receiver'))      
@@ -189,7 +189,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_threaded_actor_in_actor(self):
         ''' test_threaded_actors.test_actors_threaded_actor_in_actor
         '''
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_threaded_actor_in_actor')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_threaded_actor_in_actor' % __name__)
         parent = ThreadedActor()      
         parent.add_child(ThreadedActor())
         parent.add_child(ThreadedActor())      
@@ -204,7 +204,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_send_msg_between_threaded_actors(self):
         ''' test_threaded_actors.test_actors_send_msg_between_threaded_actors
         '''        
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors' % __name__)
         parent = TestActor()      
         parent.add_child(ThreadedSenderActor(name='Sender'))      
         parent.add_child(ThreadedReceiverActor(name='Receiver'))      
@@ -219,7 +219,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
     def test_actors_send_msg_between_threaded_actors_in_thread(self):
         ''' test_threaded_actors.test_actors_send_msg_between_threaded_actors in thread
         '''        
-        _logger.debug('ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors_in_thread')
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_send_msg_between_threaded_actors_in_thread' % __name__)
         parent = ThreadedActor()      
         parent.add_child(ThreadedSenderActor(name='Sender'))      
         parent.add_child(ThreadedReceiverActor(name='Receiver'))      

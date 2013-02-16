@@ -45,6 +45,8 @@ class GreenletActor(Actor):
         # Actor Family
         self._family = AF_GREENLET
 
+        self._logger = logging.getLogger('%s.GreenletActor' % __name__)
+
     def sleep(self, timeout=0):
         ''' actor sleep for timeout
         '''

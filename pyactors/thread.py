@@ -47,6 +47,8 @@ class ThreadedGeneratorActor(GeneratorActor):
         self._thread = threading.Thread(name=self._name, target=self.run)
         self._thread.daemon = True
 
+        self._logger = logging.getLogger('%s.ThreadedGeneratorActor' % __name__)
+
     @property
     def processing(self):
         ''' return True if actor is processing 
