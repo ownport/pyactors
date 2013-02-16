@@ -9,6 +9,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 from pyactors.forked import ForkedGreenletActor
+from pyactors.exceptions import EmptyInboxException
 
 from multiprocessing import Manager
 
@@ -17,13 +18,16 @@ class TestActor(ForkedGreenletActor):
     '''
     def __init__(self):
         super(TestActor, self).__init__()
-        self.result = Manager().Namespace()
-        self.result.i = 0
+        self.result = 0
     
     def loop(self):
         for i in xrange(10):
             if self.processing:
-                self.result.i += i
+                self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
+                else:
+                    self.send(self.result)
                 self.sleep()
             else:
                 break
@@ -40,7 +44,15 @@ class ForkedGreenletActorTest(unittest.TestCase):
         while actor.processing:
             time.sleep(0.1)
         actor.stop()
-        self.assertEqual(actor.result.i, 45)
+        
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 

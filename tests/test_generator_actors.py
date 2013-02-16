@@ -22,6 +22,8 @@ class TestActor(GeneratorActor):
         for i in range(self.iters):
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
                 yield
             else:
                 break
@@ -94,7 +96,15 @@ class GeneratorActorTest(unittest.TestCase):
             parent.add_child(TestActor())      
         parent.start()
         parent.run()
-        self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 50)
+
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
@@ -108,7 +118,16 @@ class GeneratorActorTest(unittest.TestCase):
             parent.add_child(TestActor(iters=i))      
         parent.start()
         parent.run()
-        self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(result, [0,0,0,0,1,1,1,3,3,6])
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)

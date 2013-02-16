@@ -19,14 +19,15 @@ class TestActor(GeneratorActor):
     '''
     def __init__(self, name=None, iters=10):
         super(TestActor, self).__init__(name=name)
-        self.result = Manager().Namespace()
-        self.result.i = 0
+        self.result = 0
         self.iters = iters
     
     def loop(self):
         for i in range(self.iters):
             if self.processing:
-                self.result.i += i
+                self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
                 yield
             else:
                 break
@@ -37,13 +38,16 @@ class ForkedGenActor(ForkedGeneratorActor):
     '''
     def __init__(self, name=None):
         super(ForkedGenActor, self).__init__(name=name)
-        self.result = Manager().Namespace()
-        self.result.i = 0
+        self.result = 0
     
     def loop(self):
         for i in xrange(10):
             if self.processing:
-                self.result.i += i
+                self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
+                else:
+                    self.send(self.result)
                 yield
             else:
                 break
@@ -54,13 +58,14 @@ class LongRunningActor(ForkedGeneratorActor):
     '''
     def __init__(self, name=None):
         super(LongRunningActor, self).__init__(name=name)
-        self.result = Manager().Namespace()
-        self.result.i = 0
+        self.result = 0
 
     def loop(self):
         while self.processing:
         #for i in range(100):
-            self.result.i += 1
+            self.result += 1
+            if self.parent is not None:
+                self.parent.send(self.result)
             yield
         self.stop()
 
@@ -103,7 +108,15 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         while actor.processing:
             time.sleep(0.1)
         actor.stop()
-        self.assertEqual(actor.result.i, 45)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+
+        self.assertEqual(len(result), 10)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
@@ -116,9 +129,18 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, True)
         time.sleep(0.5)
         actor.stop()
-        self.assertGreater(actor.result.i, 0)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertGreater(result, 0)
+
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
+        #assert False, 'test_actors_stop_in_the_middle'
 
     def test_actors_processing_with_children(self):
         ''' test_forked_gen_actors.test_actors_processing_with_children
@@ -131,7 +153,15 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         parent.stop()
-        self.assertEqual([child.result.i for child in parent.children], [45,45,45,45,45])
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 50)
+
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
@@ -146,7 +176,16 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         parent.stop()
-        self.assertEqual(set([child.result.i for child in parent.children]), set([0,0,1,3,6]))
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(result, [0,0,0,0,1,1,1,3,3,6])
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
@@ -178,7 +217,15 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         parent.stop()       
-        self.assertEqual([child.result.i for child in parent.children], [45,45])
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 20)
+
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
 

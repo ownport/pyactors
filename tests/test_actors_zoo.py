@@ -28,6 +28,8 @@ class ActorGe(GeneratorActor):
             _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
             else:
                 break
             yield
@@ -46,6 +48,8 @@ class ActorGr(GreenletActor):
             _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
             else:
                 break
             self.sleep()
@@ -75,6 +79,12 @@ class ActorsZooTest(unittest.TestCase):
         parent.start()
         parent.run()
         parent.stop()
-        self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 50)
         
                 

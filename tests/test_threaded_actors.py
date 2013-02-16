@@ -24,6 +24,8 @@ class ThreadedActor(ThreadedGeneratorActor):
         for i in xrange(10):
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
                 yield
             else:
                 break
@@ -40,6 +42,8 @@ class LongRunningActor(ThreadedGeneratorActor):
         while self.processing:
         #for i in range(100):
             self.result += 1
+            if self.parent is not None:
+                self.parent.send(self.result)
             yield
         self.stop()
 
@@ -55,6 +59,8 @@ class TestActor(GeneratorActor):
         for i in range(self.iters):
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
                 yield
             else:
                 break
@@ -151,7 +157,15 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         parent.start()
         while parent.processing:
             time.sleep(0.1)
-        self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 50)
+
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
@@ -165,7 +179,16 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         parent.start()
         while parent.processing:
             time.sleep(0.1)
-        self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(result, [0,0,0,0,1,1,1,3,3,6])
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         

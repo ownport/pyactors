@@ -28,6 +28,20 @@ class ActorTest(unittest.TestCase):
         self.assertTrue(type(actor.address) == str)
         self.assertEqual(len(actor.address), 32)
 
+    def test_actors_run_not_implemented(self):
+        ''' test_actors_run_not_implemented
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_run_not_implemented' % __name__)
+        actor = pyactors.Actor()
+        self.assertRaises(RuntimeError, actor.run)
+
+    def test_actors_loop_not_implemented(self):
+        ''' test_actors_loop_not_implemented
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_loop_not_implemented' % __name__)
+        actor = pyactors.Actor()
+        self.assertRaises(RuntimeError, actor.loop)
+
     def test_actors_add_remove_child(self):
         ''' test_actors.test_actors_add_remove_child
         '''

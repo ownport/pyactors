@@ -19,32 +19,28 @@ class TestActor(GreenletActor):
         self.iters = iters
     
     def loop(self):
-        _logger.debug('%s.processing_loop(), started' % (self.name))
         for i in range(self.iters):
-            _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
             if self.processing:
                 self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
             else:
                 break
             self.sleep()
         self.stop()
-        _logger.debug('%s.processing_loop(), completed' % (self.name))
 
 class SenderActor(GreenletActor):
     ''' Sender Actor
     '''
     def loop(self):
-        _logger.debug('%s.processing_loop(), started' % (self.name))
         receiver_founded = False
         while self.processing:
             for actor in self.find(actor_name='Receiver'):
-                _logger.debug('send msg to actor: %s' % actor)
                 actor.send('message from sender')
                 receiver_founded = True
             if receiver_founded:
                 break
         self.stop()
-        _logger.debug('%s.processing_loop(), completed' % (self.name))
 
 class ReceiverActor(GreenletActor):
     ''' ReceiverActor
@@ -105,7 +101,15 @@ class GeventActorTest(unittest.TestCase):
             parent.add_child(TestActor(name='ChildActor-%s' % i))      
         parent.start()
         parent.run()
-        self.assertEqual([child.result for child in parent.children], [45,45,45,45,45])
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 50)
+
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
@@ -120,7 +124,16 @@ class GeventActorTest(unittest.TestCase):
         parent.start()
         parent.run()
         parent.stop()
-        self.assertEqual(set([child.result for child in parent.children]), set([0,0,1,3,6]))
+
+        result = []
+        while True:
+            try:
+                result.append(parent.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(result, [0,0,0,0,1,1,1,3,3,6])
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(parent.run_once(), False)
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
