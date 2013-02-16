@@ -65,6 +65,7 @@ class ActorsZooTest(unittest.TestCase):
     def test_generator_and_greenlet(self):
         ''' test_actors_zoo.test_generator_and_greenlet
         '''
+        _logger = logging.getLogger('%s.ActorsZooTest.test_generator_and_greenlet' % __name__)
         parent = ActorGe(name='parent')
         parent.add_child(ActorGe(name='child-actor-ge-1'))
         parent.add_child(ActorGr(name='child-actor-gr-2'))
