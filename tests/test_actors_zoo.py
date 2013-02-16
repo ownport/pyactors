@@ -8,52 +8,13 @@ import unittest
 import logging
 _logger = logging.getLogger(__name__)
 
-from pyactors.greenlet import GreenletActor
-from pyactors.generator import GeneratorActor
 from pyactors.thread import ThreadedGeneratorActor
 from pyactors.forked import ForkedGeneratorActor
 from pyactors.forked import ForkedGreenletActor
 from pyactors.exceptions import EmptyInboxException
 
-class ActorGe(GeneratorActor):
-    ''' ActorGe
-    '''
-    def __init__(self, name=None, iters=10):
-        super(ActorGe, self).__init__(name=name)
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-            else:
-                break
-            yield
-        self.stop()
-    
-class ActorGr(GreenletActor):
-    ''' ActorGr
-    '''
-    def __init__(self, name=None, iters=10):
-        super(ActorGr, self).__init__(name=name)
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            _logger.debug('%s.loop(), i/iters: %d/%d' % (self.name, i, self.iters))
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-            else:
-                break
-            self.sleep()
-        self.stop()
+from tests import TestGeneratorActor as ActorGe
+from tests import TestGreenletActor as ActorGr
 
 class ActorTh(ThreadedGeneratorActor):
     pass 

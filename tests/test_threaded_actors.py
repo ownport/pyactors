@@ -12,6 +12,9 @@ from pyactors.generator import GeneratorActor
 from pyactors.thread import ThreadedGeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
+from tests import TestGeneratorActor as TestActor
+from tests import SenderGeneratorActor as SenderActor
+from tests import ReceiverGeneratorActor as ReceiverActor
 
 class ThreadedActor(ThreadedGeneratorActor):
     ''' ThreadedActor
@@ -47,52 +50,6 @@ class LongRunningActor(ThreadedGeneratorActor):
             yield
         self.stop()
 
-class TestActor(GeneratorActor):
-    ''' TestActor
-    '''
-    def __init__(self, iters=10):
-        super(TestActor, self).__init__()
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-                yield
-            else:
-                break
-        self.stop()
-
-class SenderActor(GeneratorActor):
-    ''' Sender Actor
-    '''
-    def loop(self):
-        for actor in self.find(actor_name='Receiver'):
-            actor.send('message from sender')
-        self.stop()
-
-class ReceiverActor(GeneratorActor):
-    ''' ReceiverActor
-    '''
-    def __init__(self, name=None):
-        super(ReceiverActor, self).__init__(name=name)
-        self.message = None
-        
-    def loop(self):
-        while self.processing:
-            try:
-                self.message = self.inbox.get()    
-            except EmptyInboxException:
-                self.waiting = True
-                yield
-                
-            if self.message:
-                break
-        self.stop()
-
 class ThreadedSenderActor(ThreadedGeneratorActor):
     ''' Threaded Sender Actor
     '''
@@ -121,6 +78,34 @@ class ThreadedReceiverActor(ThreadedGeneratorActor):
         self.stop()
 
 class ThreadedGeneratorActorTest(unittest.TestCase):
+
+    def test_actors_incorrect_processing_value_set(self):
+        ''' test_actors_incorrect_processing_value_set
+        '''
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_incorrect_processing_value_set' % __name__)
+        actor = ThreadedActor()
+        try:
+            actor.processing = 1
+        except RuntimeError:
+            pass
+
+    def test_actors_incorrect_waiting_value_set(self):
+        ''' test_actors_incorrect_waiting_value_set
+        '''
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_incorrect_waiting_value_set' % __name__)
+        actor = ThreadedActor()
+        try:
+            actor.waiting = 1
+        except RuntimeError:
+            pass
+
+    def test_actors_set_waiting_flag(self):
+        ''' test_actors_set_waiting_flag
+        '''
+        logger = logging.getLogger('%s.ThreadedGeneratorActorTest.test_actors_set_waiting_flag' % __name__)
+        actor = ThreadedActor()
+        actor.waiting = True
+        self.assertEqual(actor.waiting, True)
 
     def test_actors_run(self):
         ''' test_threaded_actors.test_actors_run
@@ -204,10 +189,7 @@ class ThreadedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         parent.stop()       
-        self.assertEqual(
-                [actor.message for actor in parent.find(actor_name='Receiver')],
-                ['message from sender']
-        ) 
+        self.assertEqual(parent.inbox.get(), 'message from sender') 
 
     def test_actors_threaded_actor_in_actor(self):
         ''' test_threaded_actors.test_actors_threaded_actor_in_actor

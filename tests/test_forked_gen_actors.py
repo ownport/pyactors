@@ -11,27 +11,9 @@ from pyactors.generator import GeneratorActor
 from pyactors.forked import ForkedGeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
-from multiprocessing import Manager
-
-
-class TestActor(GeneratorActor):
-    ''' TestActor
-    '''
-    def __init__(self, name=None, iters=10):
-        super(TestActor, self).__init__(name=name)
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-                yield
-            else:
-                break
-        self.stop()
+from tests import TestGeneratorActor as TestActor
+from tests import SenderGeneratorActor as SenderActor
+from tests import ReceiverGeneratorActor as ReceiverActor
         
 class ForkedGenActor(ForkedGeneratorActor):
     ''' Forked Generator Actor
@@ -67,34 +49,6 @@ class LongRunningActor(ForkedGeneratorActor):
             if self.parent is not None:
                 self.parent.send(self.result)
             yield
-        self.stop()
-
-class SenderActor(GeneratorActor):
-    ''' Sender Actor
-    '''
-    def loop(self):
-        for actor in self.find(actor_name='Receiver'):
-            actor.send('message from sender')
-        self.stop()
-
-class ReceiverActor(GeneratorActor):
-    ''' ReceiverActor
-    '''
-    def __init__(self, name=None):
-        super(ReceiverActor, self).__init__(name=name)
-        self.result = Manager().Namespace()
-        self.result.message = None
-        
-    def loop(self):
-        while self.processing:
-            try:
-                self.result.message = self.inbox.get()    
-            except EmptyInboxException:
-                self.waiting = True
-                yield
-                
-            if self.result.message:
-                break
         self.stop()
 
 class ForkedGeneratorActorTest(unittest.TestCase):
@@ -201,10 +155,7 @@ class ForkedGeneratorActorTest(unittest.TestCase):
         while parent.processing:
             time.sleep(0.1)
         parent.stop()       
-        self.assertEqual(
-                [actor.result.message for actor in parent.find(actor_name='Receiver')],
-                ['message from sender']
-        ) 
+        self.assertEqual(parent.inbox.get(), 'message from sender') 
 
     def test_actors_forked_actor_in_actor(self):
         ''' test_forked_gen_actors.test_actors_forked_actor_in_actor

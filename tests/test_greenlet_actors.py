@@ -6,61 +6,11 @@ import unittest
 import logging
 _logger = logging.getLogger(__name__)
 
-from pyactors.greenlet import GreenletActor
 from pyactors.exceptions import EmptyInboxException
 
-
-class TestActor(GreenletActor):
-    ''' TestActor
-    '''
-    def __init__(self, name=None, iters=10):
-        super(TestActor, self).__init__(name=name)
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-            else:
-                break
-            self.sleep()
-        self.stop()
-
-class SenderActor(GreenletActor):
-    ''' Sender Actor
-    '''
-    def loop(self):
-        receiver_founded = False
-        while self.processing:
-            for actor in self.find(actor_name='Receiver'):
-                actor.send('message from sender')
-                receiver_founded = True
-            if receiver_founded:
-                break
-        self.stop()
-
-class ReceiverActor(GreenletActor):
-    ''' ReceiverActor
-    '''
-    def __init__(self, name=None):
-        super(ReceiverActor, self).__init__(name=name)
-        self.message = None
-        
-    def loop(self):
-        while self.processing:
-            try:
-                self.message = self.inbox.get()    
-            except EmptyInboxException:
-                self._waiting = True
-                
-            if self.message:
-                break
-            
-            self.sleep()
-        self.stop()
+from tests import TestGreenletActor as TestActor
+from tests import SenderGreenletActor as SenderActor
+from tests import ReceiverGreenletActor as ReceiverActor
 
 class GeventActorTest(unittest.TestCase):
 

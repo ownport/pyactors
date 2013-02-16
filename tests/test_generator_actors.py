@@ -10,52 +10,9 @@ import unittest
 from pyactors.generator import GeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
-class TestActor(GeneratorActor):
-    ''' TestActor
-    '''
-    def __init__(self, iters=10):
-        super(TestActor, self).__init__()
-        self.result = 0
-        self.iters = iters
-    
-    def loop(self):
-        for i in range(self.iters):
-            if self.processing:
-                self.result += i
-                if self.parent is not None:
-                    self.parent.send(self.result)
-                yield
-            else:
-                break
-        self.stop()
-
-class Sender(GeneratorActor):
-    ''' Sender
-    '''
-    def loop(self):
-        for actor in self.find(actor_name='Receiver'):
-            actor.send('message from sender')
-        self.stop()
-
-class Receiver(GeneratorActor):
-    ''' Receiver
-    '''
-    def __init__(self, name=None):
-        super(Receiver, self).__init__(name=name)
-        self.message = None
-        
-    def loop(self):
-        while self.processing:
-            try:
-                self.message = self.inbox.get()    
-            except EmptyInboxException:
-                self._waiting = True
-                yield
-                
-            if self.message:
-                break
-        self.stop()
-
+from tests import SenderGeneratorActor as Sender
+from tests import ReceiverGeneratorActor as Receiver
+from tests import TestGeneratorActor as TestActor
 
 class GeneratorActorTest(unittest.TestCase):
     
@@ -142,10 +99,7 @@ class GeneratorActorTest(unittest.TestCase):
         parent.add_child(Receiver(name='Receiver'))      
         parent.start()
         parent.run()
-        self.assertEqual(
-                [actor.message for actor in parent.find(actor_name='Receiver')],
-                ['message from sender']
-        ) 
+        self.assertEqual(parent.inbox.get(), 'message from sender') 
 
 
 
