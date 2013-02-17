@@ -57,6 +57,7 @@ class ActorTest(unittest.TestCase):
         logger = logging.getLogger('%s.ActorTest.test_actors_run_not_implemented' % __name__)
         actor = pyactors.Actor()
         self.assertRaises(RuntimeError, actor.run)
+        self.assertRaises(RuntimeError, actor.run_once)
 
     def test_actors_loop_not_implemented(self):
         ''' test_actors_loop_not_implemented
@@ -78,6 +79,33 @@ class ActorTest(unittest.TestCase):
         for actor in parent.children:
             parent.remove_child(actor.address)
         self.assertEqual(len(parent.children), 0)
+
+    def test_actors_add_existing_actor(self):
+        ''' test_actors_add_existing_actor
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_add_existing_actor' % __name__)
+        parent = pyactors.Actor()
+        child = pyactors.Actor()
+        parent.add_child(child)
+        self.assertRaises(RuntimeError, parent.add_child, child)
+
+    def test_actors_remove_non_existing_actor(self):
+        ''' test_actors_remove_non_existing_actor
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_remove_non_existing_actor' % __name__)
+        parent = pyactors.Actor()
+        child = pyactors.Actor()
+        self.assertRaises(RuntimeError, parent.remove_child, child.address)
+
+    def test_actors_find_children(self):
+        ''' test_actors.test_actors_find_children
+        '''
+        logger = logging.getLogger('%s.ActorTest.test_actors_find_children' % __name__)
+        parent = pyactors.Actor()
+        child = pyactors.Actor()
+        parent.add_child(child)
+        self.assertEqual(len(parent.find()), 1)
+        parent.remove_child(child.address)
 
     def test_actors_find_child_by_address(self):
         ''' test_actors.test_actors_find_child_by_address
