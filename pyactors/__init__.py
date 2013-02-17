@@ -143,7 +143,7 @@ class Actor(object):
     def add_child(self, actor):
         ''' add actor's child
         '''
-        if actor.address not in self.children:
+        if actor not in self.children:
             actor.parent = self
             self._children[actor.address] = actor
         else:
