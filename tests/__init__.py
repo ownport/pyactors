@@ -40,6 +40,8 @@ class TestGeneratorActor(GeneratorActor):
                 result += i
                 if self.parent is not None:
                     self.parent.send(result)
+                else:
+                    self.send(result)
                 yield
             else:
                 break
@@ -93,6 +95,8 @@ class TestGreenletActor(GreenletActor):
                 result += i
                 if self.parent is not None:
                     self.parent.send(result)
+                else:
+                    self.send(result)
             else:
                 break
             self.sleep()
@@ -128,6 +132,10 @@ class ReceiverGreenletActor(GreenletActor):
                 self._waiting = True
                 
             if message:
+                if self.parent is not None:
+                    self.parent.send(message)
+                else:
+                    self.send(message)
                 break
             
             self.sleep()

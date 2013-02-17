@@ -45,6 +45,8 @@ def network_logger( name=__name__, level=logging.DEBUG,
     logger = logging.getLogger(name)
     logger.setLevel(level)
     socketHandler = logging.handlers.SocketHandler(host, port)
+    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
+    socketHandler.setFormatter(formatter)
     logger.addHandler(socketHandler)
     return logger
 
@@ -54,6 +56,8 @@ class Actor(object):
     def __init__(self, name=None):
         ''' __init__
         '''
+        self._logger = logging.getLogger('%s.Actor' % __name__)
+
         # actor name
         if not name:
             self._name = self.__class__.__name__
@@ -87,8 +91,6 @@ class Actor(object):
         # actor supervise loop
         self.supervise_loop = None
         
-        self._logger = logging.getLogger('%s.Actor' % __name__)
-
     def __str__(self):
         ''' represent actor as string
         '''
@@ -226,6 +228,7 @@ class Actor(object):
             stopped_children = 0
             for child in self.children:
                 if child.processing:
+                #if child.is_alive():
                     child.stop()
                 else:
                     #self.remove_child(child.address)
@@ -263,6 +266,7 @@ class Actor(object):
     def supervise(self):        
         ''' supervise loop
         '''
+        self._logger.debug('supervise started')
         while self.processing:
             stopped_children = 0
             for child in self.children:
@@ -270,17 +274,16 @@ class Actor(object):
                 # that the actor should be stopped but it's not a fact
                 # that the actor was stopped.
                 if child.processing:
+                #if child.is_alive():
                     if child.family in (AF_GENERATOR, AF_GREENLET):
                         child.run_once()
                 else:
                     stopped_children += 1
-                
-                if child.family == AF_GREENLET:
-                    child.sleep()
                 yield
 
             if len(self.children) == stopped_children:
                 break
+        self._logger.debug('supervise stopped')
             
 class  ActorSystem(Actor):
     ''' Actor System

@@ -86,8 +86,7 @@ class ThreadedGeneratorActor(GeneratorActor):
             self._waiting.set()
         else:
             self._waiting.clear()
-        
-                
+                        
     def start(self):
         ''' start actor
         '''

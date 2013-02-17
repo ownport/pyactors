@@ -96,7 +96,6 @@ class ForkedGeneratorActor(GeneratorActor):
         ''' start actor
         '''
         super(ForkedGeneratorActor, self).start()
-
         self._process.start()
 
 class ForkedGreenletActor(GreenletActor):
@@ -161,6 +160,5 @@ class ForkedGreenletActor(GreenletActor):
         ''' start actor
         '''
         super(ForkedGreenletActor, self).start()
-
         self._process.start()
 

@@ -22,7 +22,15 @@ class GeventActorTest(unittest.TestCase):
         actor.start()
         self.assertEqual(actor.processing, True)
         actor.run()
-        self.assertEqual(actor.result, 45)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(actor.run_once(), False)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
@@ -37,7 +45,15 @@ class GeventActorTest(unittest.TestCase):
         for _ in range(5):
             actor.run_once()
         actor.stop()
-        self.assertEqual(actor.result, 10)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertGreater(len(result), 1)
+
         self.assertEqual(actor.run_once(), False)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
@@ -98,10 +114,7 @@ class GeventActorTest(unittest.TestCase):
         parent.start()
         parent.run()
         parent.stop()       
-        self.assertEqual(
-                [actor.message for actor in parent.find(actor_name='Receiver')],
-                ['message from sender']
-        ) 
+        self.assertEqual(parent.inbox.get(), 'message from sender')
 
 if __name__ == '__main__':
     unittest.main()

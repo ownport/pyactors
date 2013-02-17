@@ -24,7 +24,15 @@ class GeneratorActorTest(unittest.TestCase):
         actor.start()
         self.assertEqual(actor.processing, True)
         actor.run()
-        self.assertEqual(actor.result, 45)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertEqual(len(result), 10)
+
         self.assertEqual(actor.run_once(), False)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
@@ -39,7 +47,15 @@ class GeneratorActorTest(unittest.TestCase):
         for _ in range(5):
             actor.run_once()
         actor.stop()
-        self.assertEqual(actor.result, 10)
+
+        result = []
+        while True:
+            try:
+                result.append(actor.inbox.get())
+            except EmptyInboxException:
+                break
+        self.assertGreater(len(result), 1)
+
         self.assertEqual(actor.run_once(), False)
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
