@@ -17,9 +17,10 @@ setup(
     long_description = open('README.md').read(),
     license = "BSD",
     keywords = "actors",
-    packages = ['pyactors'],
+    packages = ['pyactors', 'docs', 'tests'],
     classifiers = [
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: POSIX',
