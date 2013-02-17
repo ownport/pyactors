@@ -14,7 +14,7 @@ setup(
     author_email = 'ownport@gmail.com',
     url = 'https://github.com/ownport/pyactors',
     description = 'Simple implementation actors on python',
-    long_description = open('README.md').read()
+    long_description = open('README.md').read(),
     license = "BSD",
     keywords = "actors",
     packages = ['pyactors'],
