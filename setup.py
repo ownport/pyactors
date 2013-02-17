@@ -3,19 +3,21 @@
 #
 
 import re
+import pyactors
 
 from setuptools import setup
-from pyactors import __version__ as version
-from pyactors import __author__ as author
 
 setup(
     name = "pyactors",
-    version = version,
-    author = re.sub(r'\s+<.*', r'', author),
+    version = pyactors.__version__,
+    author = re.sub(r'\s+<.*', r'', pyactors.__author__),
+    author_email = 'ownport@gmail.com',
+    url = 'https://github.com/ownport/pyactors',
     description = 'Simple implementation actors on python',
+    long_description = open('README.md').read()
     license = "BSD",
     keywords = "actors",
-    py_modules = ['pyactors'],
+    packages = ['pyactors'],
     classifiers = [
         'Programming Language :: Python',
         'Intended Audience :: Developers',
