@@ -14,4 +14,6 @@ http://sdiehl.github.com/gevent-tutorial/
 http://en.wikipedia.org/wiki/Actor_model
 - **Actor model theory (Wikipedia)**,
 http://en.wikipedia.org/wiki/Actor_model_theory
+- **Message Passing Conccurrency (Actor Model) in Python**
+http://www.valuedlessons.com/2008/06/message-passing-conccurrency-actor.html
 
