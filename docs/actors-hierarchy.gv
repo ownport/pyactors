@@ -1,0 +1,22 @@
+digraph actors_hierarchy {
+
+    graph [ rankdir = "LR"];
+    node [shape=record,fontname=Arial,fontsize=9];
+    edge [arrowsize=0.5,fontname=Arial,fontsize=9];
+
+    // Nodes
+    
+    GeneratorActor;
+    GreenletActor;
+    ThreadedGeneratorActor;
+    ForkedGreenletActor;
+    ForkedGeneratorActor;
+    
+    // Links
+
+    GeneratorActor -> ThreadedGeneratorActor;
+    GeneratorActor -> ForkedGeneratorActor;
+    
+    GreenletActor -> ForkedGreenletActor;
+
+}
