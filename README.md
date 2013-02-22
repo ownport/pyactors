@@ -9,6 +9,8 @@ Simple implementation actors on python. Experimental project. It's attempt to me
 - [PyActors API](https://github.com/ownport/pyactors/blob/master/docs/api.md)
 - [For developers](https://github.com/ownport/pyactors/blob/master/docs/development.md)
 
+- [Articles](https://github.com/ownport/pyactors/blob/master/docs/articles.md)
+
 ## Similar projects
 
 - [Pykka](http://pykka.readthedocs.org/en/latest/) is easy to use concurrency for Python using the actor model
