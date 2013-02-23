@@ -5,4 +5,11 @@ graph:
 clean-tmp-files:
 	@ rm logs/*
 	
+test:
+	@ echo 'Remove old log files'
+	@ rm logs/*
+	@ echo 'Running tests'
+	@ nosetests
+	@ echo 'Tests completed'
+    
 
