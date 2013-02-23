@@ -6,18 +6,9 @@ import logging
 
 from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
+from pyactors.forked import ForkedGeneratorActor
+from pyactors.forked import ForkedGreenletActor
 from pyactors.exceptions import EmptyInboxException
-
-def file_logger(name, filename):
-    ''' returns file logger
-    '''
-    logger = logging.getLogger(name)
-    file_handler = logging.FileHandler(filename)
-    logger.addHandler(file_handler)
-    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
-    file_handler.setFormatter(formatter)
-    logger.setLevel(logging.DEBUG)
-    return logger
     
 ''' 
 -------------------------------------------
@@ -139,5 +130,68 @@ class ReceiverGreenletActor(GreenletActor):
                 break
             
             self.sleep()
+        self.stop()
+
+''' 
+-------------------------------------------
+Forked Actors
+-------------------------------------------
+'''
+class ForkedGenActor(ForkedGeneratorActor):
+    ''' Forked Generator Actor
+    '''
+    def loop(self):
+        ''' loop
+        '''
+        result = 0
+        for i in xrange(10):
+            if self.processing:
+                result += i
+                if self.parent is not None:
+                    self.parent.send(result)
+                else:
+                    self.send(result)
+                yield
+            else:
+                break
+        self.stop()
+
+class ForkedLongRunningActor(ForkedGeneratorActor):
+    ''' ForkedLongRunningActor
+    '''
+    def __init__(self, name=None, logger=None):
+        super(ForkedLongRunningActor, self).__init__(name=name, logger=logger)
+        self.result = 0
+
+    def loop(self):
+        while self.processing:
+        #for i in range(100):
+            if self.processing:
+                self.result += 1
+                if self.parent is not None:
+                    self.parent.send(self.result)
+                yield
+            else:
+                break
+        self.stop()
+
+class ForkedGreActor(ForkedGreenletActor):
+    ''' Forked Greenlet Actor (test)
+    '''
+    def __init__(self, name=None, logger=None):
+        super(ForkedGreActor, self).__init__(name=name, logger=logger)
+        self.result = 0
+    
+    def loop(self):
+        for i in xrange(10):
+            if self.processing:
+                self.result += i
+                if self.parent is not None:
+                    self.parent.send(self.result)
+                else:
+                    self.send(self.result)
+                self.sleep()
+            else:
+                break
         self.stop()
 

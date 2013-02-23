@@ -8,6 +8,7 @@ import unittest
 import logging
 _logger = logging.getLogger(__name__)
 
+from pyactors.logs import file_logger
 from pyactors.thread import ThreadedGeneratorActor
 from pyactors.forked import ForkedGeneratorActor
 from pyactors.forked import ForkedGreenletActor
@@ -30,7 +31,9 @@ class ActorsZooTest(unittest.TestCase):
     def test_generator_and_greenlet(self):
         ''' test_actors_zoo.test_generator_and_greenlet
         '''
-        _logger = logging.getLogger('%s.ActorsZooTest.test_generator_and_greenlet' % __name__)
+        test_name = 'test_actors_zoo.test_generator_and_greenlet'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = ActorGe(name='parent')
         parent.add_child(ActorGe(name='child-actor-ge-1'))
         parent.add_child(ActorGr(name='child-actor-gr-2'))

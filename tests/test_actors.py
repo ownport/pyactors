@@ -2,36 +2,40 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
-import logging
-logger = logging.getLogger(__name__)
-
 import unittest
 import pyactors
 
+from pyactors.logs import file_logger
 
 class ActorTest(unittest.TestCase):
 
-    def test_actors_create(self):
-        ''' test_actors.test_actors_create
+    def test_create(self):
+        ''' test_actors.test_create
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_create' % __name__)
+        test_name = 'test_actors.test_create'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = pyactors.Actor()
         self.assertFalse(actor.processing)
         self.assertIsNotNone(actor)
 
-    def test_actors_address(self):
-        ''' test_actors.test_actors_address
+    def test_address(self):
+        ''' test_actors.test_address
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_address' % __name__)
+        test_name = 'test_actors.test_address'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = pyactors.Actor()
         self.assertNotEqual(actor.address, None)
         self.assertTrue(type(actor.address) == str)
         self.assertEqual(len(actor.address), 32)
 
-    def test_actors_properties(self):
-        ''' test_actors.test_actors_properties
+    def test_properties(self):
+        ''' test_actors.test_properties
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_properties' % __name__)
+        test_name = 'test_actors.test_properties'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = pyactors.Actor(name='test_actor')
         self.assertTrue(isinstance(str(actor), str))
         self.assertEqual(actor.name, 'test_actor')
@@ -51,25 +55,31 @@ class ActorTest(unittest.TestCase):
         except RuntimeError:
             pass
 
-    def test_actors_run_not_implemented(self):
-        ''' test_actors_run_not_implemented
+    def test_run_not_implemented(self):
+        ''' test_run_not_implemented
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_run_not_implemented' % __name__)
+        test_name = 'test_actors.test_run_not_implemented'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = pyactors.Actor()
         self.assertRaises(RuntimeError, actor.run)
         self.assertRaises(RuntimeError, actor.run_once)
 
-    def test_actors_loop_not_implemented(self):
-        ''' test_actors_loop_not_implemented
+    def test_loop_not_implemented(self):
+        ''' test_loop_not_implemented
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_loop_not_implemented' % __name__)
+        test_name = 'test_actors.test_loop_not_implemented'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = pyactors.Actor()
         self.assertRaises(RuntimeError, actor.loop)
 
-    def test_actors_add_remove_child(self):
-        ''' test_actors.test_actors_add_remove_child
+    def test_add_remove_child(self):
+        ''' test_actors.test_add_remove_child
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_add_remove_child' % __name__)
+        test_name = 'test_actors.test_add_remove_child'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         parent.add_child(pyactors.Actor())
         parent.add_child(pyactors.Actor())
@@ -80,47 +90,57 @@ class ActorTest(unittest.TestCase):
             parent.remove_child(actor.address)
         self.assertEqual(len(parent.children), 0)
 
-    def test_actors_add_existing_actor(self):
-        ''' test_actors_add_existing_actor
+    def test_add_existing_actor(self):
+        ''' test_add_existing_actor
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_add_existing_actor' % __name__)
+        test_name = 'test_actors.test_add_existing_actor'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
         self.assertRaises(RuntimeError, parent.add_child, child)
 
-    def test_actors_remove_non_existing_actor(self):
-        ''' test_actors_remove_non_existing_actor
+    def test_remove_non_existing_actor(self):
+        ''' test_remove_non_existing_actor
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_remove_non_existing_actor' % __name__)
+        test_name = 'test_actors.test_remove_non_existing_actor'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         self.assertRaises(RuntimeError, parent.remove_child, child.address)
 
-    def test_actors_find_children(self):
-        ''' test_actors.test_actors_find_children
+    def test_find_children(self):
+        ''' test_actors.test_find_children
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_children' % __name__)
+        test_name = 'test_actors.test_find_children'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
         self.assertEqual(len(parent.find()), 1)
         parent.remove_child(child.address)
 
-    def test_actors_find_child_by_address(self):
-        ''' test_actors.test_actors_find_child_by_address
+    def test_find_child_by_address(self):
+        ''' test_actors.test_find_child_by_address
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_address' % __name__)
+        test_name = 'test_actors.test_find_child_by_address'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
         self.assertEqual(len(parent.find(address=child.address)), 1)
         parent.remove_child(child.address)
         
-    def test_actors_find_child_by_address_list(self):
-        ''' test_actors.test_actors_find_child_by_address_list
+    def test_find_child_by_address_list(self):
+        ''' test_actors.test_find_child_by_address_list
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_address_list' % __name__)
+        test_name = 'test_actors.test_find_child_by_address_list'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         children = [pyactors.Actor() for _ in range(10)]
         addresses = list()
@@ -131,20 +151,24 @@ class ActorTest(unittest.TestCase):
         for actor in children:
             parent.remove_child(actor.address)    
             
-    def test_actors_find_child_by_actor_class(self):
-        ''' test_actors.test_actors_find_child_by_actor_class
+    def test_find_child_by_actor_class(self):
+        ''' test_actors.test_find_child_by_actor_class
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_class' % __name__)
+        test_name = 'test_actors.test_find_child_by_actor_class'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
         self.assertEqual(len(parent.find(actor_class=pyactors.Actor)), 1)
         parent.remove_child(child.address)
 
-    def test_actors_find_child_by_actor_name(self):
-        ''' test_actors.test_actors_find_child_by_actor_name
+    def test_find_child_by_actor_name(self):
+        ''' test_actors.test_find_child_by_actor_name
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_name' % __name__)
+        test_name = 'test_actors.test_find_child_by_actor_name'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         child = pyactors.Actor()
         parent.add_child(child)
@@ -159,13 +183,15 @@ class ActorTest(unittest.TestCase):
         parent.remove_child(child.address)
 
             
-    def test_actors_find_child_by_actor_names(self):
-        ''' test_actors.test_actors_find_child_by_actor_names
+    def test_find_child_by_actor_names(self):
+        ''' test_actors.test_find_child_by_actor_names
         '''
         class TestActor(pyactors.Actor):
             pass
         
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_child_by_actor_names' % __name__)
+        test_name = 'test_actors.test_child_by_actor_names'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = pyactors.Actor()
         children = [TestActor() for _ in range(10)]
         for actor in children:
@@ -183,10 +209,12 @@ class ActorTest(unittest.TestCase):
         for actor in children:
             parent.remove_child(actor.address)    
 
-    def test_actors_find_childs_of_grandparents(self):
-        ''' test_actors.test_actors_find_childs_of_grandparents
+    def test_find_childs_of_grandparents(self):
+        ''' test_actors.test_find_childs_of_grandparents
         '''
-        logger = logging.getLogger('%s.ActorTest.test_actors_find_childs_of_grandparents' % __name__)
+        test_name = 'test_actors.test_find_childs_of_grandparents'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         grandparent = pyactors.Actor(name='grandparent')
         for _ in range(3):
             grandparent.add_child(pyactors.Actor(name='parent'))

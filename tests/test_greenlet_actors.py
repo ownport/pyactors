@@ -3,9 +3,8 @@ if '' not in sys.path:
     sys.path.append('')
 
 import unittest
-import logging
-_logger = logging.getLogger(__name__)
 
+from pyactors.logs import file_logger
 from pyactors.exceptions import EmptyInboxException
 
 from tests import TestGreenletActor as TestActor
@@ -14,10 +13,12 @@ from tests import ReceiverGreenletActor as ReceiverActor
 
 class GeventActorTest(unittest.TestCase):
 
-    def test_actors_run(self):
-        ''' test_greenlet_actors.test_actors_run
+    def test_run(self):
+        ''' test_greenlet_actors.test_run
         '''
-        logger = logging.getLogger('%s.GeventActorTest.test_actors_run' % __name__)
+        test_name = 'test_greenlet_actors.test_run'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = TestActor()
         actor.start()
         self.assertEqual(actor.processing, True)
@@ -35,10 +36,12 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
-    def test_actors_stop_in_the_middle(self):
-        ''' test_greenlet_actors.test_actors_stop_in_the_middle
+    def test_stop_in_the_middle(self):
+        ''' test_greenlet_actors.test_stop_in_the_middle
         '''  
-        logger = logging.getLogger('%s.GeventActorTest.test_actors_stop_in_the_middle' % __name__)
+        test_name = 'test_greenlet_actors.test_stop_in_the_middle'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = TestActor()
         actor.start()
         self.assertEqual(actor.processing, True)
@@ -58,10 +61,12 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
-    def test_actors_processing_with_children(self):
-        ''' test_greenlet_actors.test_actors_processing_with_children
+    def test_processing_with_children(self):
+        ''' test_greenlet_actors.test_processing_with_children
         '''    
-        logger = logging.getLogger('%s.GeventActorTest.test_actors_processing_with_children' % __name__)
+        test_name = 'test_greenlet_actors.test_processing_with_children'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = TestActor(name='ParentActor')      
         for i in range(5):
             parent.add_child(TestActor(name='ChildActor-%s' % i))      
@@ -80,10 +85,12 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
 
-    def test_actors_processing_with_diff_timelife_children(self):
-        ''' test_greenlet_actors.test_actors_processing_with_diff_timelife_children
+    def test_processing_with_diff_timelife_children(self):
+        ''' test_greenlet_actors.test_processing_with_diff_timelife_children
         '''    
-        logger = logging.getLogger('%s.GeventActorTest.test_actors_processing_with_diff_timelife_children' % __name__)
+        test_name = 'test_greenlet_actors.test_processing_with_diff_timelife_children'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = TestActor(name='ParentActor')      
         for i in range(5):
             parent.add_child(TestActor(name='ChildActor-%i' % i, iters=i))      
@@ -104,10 +111,12 @@ class GeventActorTest(unittest.TestCase):
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
-    def test_actors_send_msg_between_actors(self):
-        ''' test_greenlet_actors.test_actors_send_msg_between_actors
+    def test_send_msg_between_actors(self):
+        ''' test_greenlet_actors.test_send_msg_between_actors
         '''        
-        logger = logging.getLogger('%s.GeventActorTest.test_actors_send_msg_between_actors' % __name__)
+        test_name = 'test_greenlet_actors.test_send_msg_between_actors'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = TestActor(name='ParentActor')      
         parent.add_child(SenderActor(name='Sender'))      
         parent.add_child(ReceiverActor(name='Receiver'))      

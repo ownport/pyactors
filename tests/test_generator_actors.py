@@ -7,6 +7,7 @@ _logger = logging.getLogger(__name__)
 
 import unittest
 
+from pyactors.logs import file_logger
 from pyactors.generator import GeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
@@ -16,10 +17,12 @@ from tests import TestGeneratorActor as TestActor
 
 class GeneratorActorTest(unittest.TestCase):
     
-    def test_actors_run(self):
-        ''' test_generator_actors.test_actors_run
+    def test_run(self):
+        ''' test_generator_actors.test_run
         '''
-        logger = logging.getLogger('%s.GeneratorActorTest.test_actors_run' % __name__)
+        test_name = 'test_generator_actors.test_run'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = TestActor()
         actor.start()
         self.assertEqual(actor.processing, True)
@@ -37,10 +40,12 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
-    def test_actors_stop_in_the_middle(self):
-        ''' test_generator_actors.test_actors_stop_in_the_middle
+    def test_stop_in_the_middle(self):
+        ''' test_generator_actors.test_stop_in_the_middle
         '''  
-        logger = logging.getLogger('%s.GeneratorActorTest.test_actors_stop_in_the_middle' % __name__)
+        test_name = 'test_generator_actors.test_stop_in_the_middle'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         actor = TestActor()
         actor.start()
         self.assertEqual(actor.processing, True)
@@ -60,10 +65,12 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(actor.processing, False)
         self.assertEqual(actor.waiting, False)
 
-    def test_actors_processing_with_children(self):
-        ''' test_generator_actors.test_actors_processing_with_children
+    def test_processing_with_children(self):
+        ''' test_generator_actors.test_processing_with_children
         '''    
-        logger = logging.getLogger('%s.GeneratorActorTest.test_actors_processing_with_children' % __name__)
+        test_name = 'test_generator_actors.test_processing_with_children'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = GeneratorActor()      
         for _ in range(5):
             parent.add_child(TestActor())      
@@ -82,10 +89,12 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(parent.processing, False)
         self.assertEqual(parent.waiting, False)
         
-    def test_actors_processing_with_diff_timelife_children(self):
-        ''' test_generator_actors.test_actors_processing_with_diff_timelife_children
+    def test_processing_with_diff_timelife_children(self):
+        ''' test_generator_actors.test_processing_with_diff_timelife_children
         '''    
-        logger = logging.getLogger('%s.GeneratorActorTest.test_actors_processing_with_diff_timelife_children' % __name__)
+        test_name = 'test_generator_actors.test_processing_with_diff_timelife_children'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = GeneratorActor()      
         for i in range(5):
             parent.add_child(TestActor(iters=i))      
@@ -106,10 +115,12 @@ class GeneratorActorTest(unittest.TestCase):
         self.assertEqual(parent.waiting, False)
         
 
-    def test_actors_send_msg_between_actors(self):
-        ''' test_generator_actors.test_actors_send_msg_between_actors
+    def test_send_msg_between_actors(self):
+        ''' test_generator_actors.test_send_msg_between_actors
         '''        
-        logger = logging.getLogger('%s.GeneratorActorTest.test_actors_send_msg_between_actors' % __name__)
+        test_name = 'test_generator_actors.test_send_msg_between_actors'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
         parent = GeneratorActor()      
         parent.add_child(Sender(name='Sender'))      
         parent.add_child(Receiver(name='Receiver'))      
