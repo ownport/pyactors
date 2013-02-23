@@ -12,4 +12,10 @@ test:
 	@ nosetests
 	@ echo 'Tests completed'
     
+test-with-coverage:
+	@ echo 'Remove old log files'
+	@ rm logs/*
+	@ echo 'Running tests'
+	@ nosetests --with-coverage
+	@ echo 'Tests completed'
 
