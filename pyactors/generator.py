@@ -74,7 +74,11 @@ class GeneratorActor(Actor):
         ''' run actor
         '''
         while self.processing:
-            if not self.run_once():
+            try:
+                if not self.run_once():
+                    break
+            except Exception, err:
+                self._logger(err)
                 break
                     
                 
