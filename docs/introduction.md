@@ -76,9 +76,9 @@ Recommended combination of Actor's parents and children.
 Parent/Children | Generator | Greenlet | ThreadedGenerator | ForkedGenerator | ForkedGreenlet
 --- | --- | --- | --- | --- | ---
 Generator | X | X | X | X | X
-Greenlet | | X | | | X
+Greenlet | X | X | X | X | X
 ThreadedGenerator | X | X | | |
 ForkedGenerator | X | X | X | |
-ForkedGreenlet | | X | | |
+ForkedGreenlet | X | X | | |
 
 
