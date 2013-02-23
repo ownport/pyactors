@@ -71,12 +71,12 @@ More examples how to use actors with pyactors can be founded in [unittests](http
 
 ## Actor's children matrix
 
- | GeneratorActor | GreenletActor | ThreadedGeneratorActor | ForkedGeneratorActor | ForkedGreenletActor
+ | Generator | Greenlet | ThreadedGenerator | ForkedGenerator | ForkedGreenlet
 --- | --- | --- | --- | --- | ---
-GeneratorActorTest | | | | |
-GreenletActor | | | | |
-ThreadedGeneratorActor | | | | |
-ForkedGeneratorActor | | | | |
-ForkedGreenletActor | | | | |
+Generator | X | X | X | X | X
+Greenlet | | X | | | X
+ThreadedGenerator | X | X | | |
+ForkedGenerator | X | X | X | |
+ForkedGreenlet | | X | | |
 
 
