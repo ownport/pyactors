@@ -21,10 +21,6 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-
-import logging
-_logger = logging.getLogger(__name__)
-
 from multiprocessing import Event
 from multiprocessing import Process
 
@@ -36,11 +32,10 @@ from pyactors.generator import GeneratorActor
 class ForkedGeneratorActor(GeneratorActor):
     ''' Forked GeneratorActor
     '''        
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(ForkedGeneratorActor,self).__init__(name=name)
-        self._logger = logging.getLogger('%s.ForkedGeneratorActor' % __name__)
+        super(ForkedGeneratorActor,self).__init__(name=name, logger=logger)
         
         # Actor Family
         self._family = AF_PROCESS
@@ -100,11 +95,10 @@ class ForkedGeneratorActor(GeneratorActor):
 class ForkedGreenletActor(GreenletActor):
     ''' Forked GreenletActor
     '''        
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(ForkedGreenletActor,self).__init__(name=name)
-        self._logger = logging.getLogger('%s.ForkedGreenletActor' % __name__)
+        super(ForkedGreenletActor,self).__init__(name=name, logger=logger)
 
         # Actor Family
         self._family = AF_PROCESS

@@ -22,22 +22,22 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import Queue
+import logging
 import collections
 import multiprocessing
 from pyactors.exceptions import EmptyInboxException
 
-import logging
-_logger = logging.getLogger(__name__)
-
 class DequeInbox(object):
     ''' Inbox from collections.deque
     '''
-    def __init__(self):
+    def __init__(self, logger=None):
         ''' __init__ 
         '''
         self.__inbox = collections.deque()
-
-        self._logger = logging.getLogger('%s.DequeInbox' % __name__)
+        if logger is None:
+            self._logger = logging.getLogger('%s.DequeInbox' % __name__)
+        else:
+            self._logger = logger
                     
     def get(self):
         ''' get data from inbox 
@@ -61,12 +61,15 @@ class DequeInbox(object):
 class QueueInbox(object):
     ''' Inbox from Queue.Queue
     '''
-    def __init__(self):
+    def __init__(self, logger=None):
         ''' __init__ 
         '''
         self.__inbox = Queue.Queue()
                     
-        self._logger = logging.getLogger('%s.QueueInbox' % __name__)
+        if logger is None:
+            self._logger = logging.getLogger('%s.QueueInbox' % __name__)
+        else:
+            self._logger = logger
 
     def get(self):
         ''' get data from inbox 
@@ -91,12 +94,15 @@ class QueueInbox(object):
 class ProcessInbox(object):
     ''' Inbox from multiprocessing.Queue
     '''
-    def __init__(self):
+    def __init__(self, logger=None):
         ''' __init__ 
         '''
         self.__inbox = multiprocessing.Queue()
-                    
-        self._logger = logging.getLogger('%s.ProcessInbox' % __name__)
+        
+        if logger is None:
+            self._logger = logging.getLogger('%s.ProcessInbox' % __name__)
+        else:
+            self._logger = logger
 
     def get(self):
         ''' get data from inbox 

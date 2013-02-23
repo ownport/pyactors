@@ -22,9 +22,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import gevent 
-import logging
-
-_logger = logging.getLogger(__name__)
 
 from pyactors import Actor
 from pyactors import AF_GENERATOR, AF_GREENLET
@@ -33,11 +30,10 @@ from pyactors.inboxes import DequeInbox as Inbox
 class GreenletActor(Actor):
     ''' Greenlet Actor
     '''
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(GreenletActor, self).__init__(name=name)
-        self._logger = logging.getLogger('%s.GreenletActor' % __name__)
+        super(GreenletActor, self).__init__(name=name, logger=logger)
         
         # inbox
         self.inbox = Inbox()

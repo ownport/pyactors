@@ -22,16 +22,17 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import logging
+import logging.handlers
 
 def file_logger(name, filename):
     ''' returns file logger
     '''
     logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
     file_handler = logging.FileHandler(filename)
     logger.addHandler(file_handler)
     formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
     file_handler.setFormatter(formatter)
-    logger.setLevel(logging.DEBUG)
     return logger
 
 def network_logger( name=__name__, level=logging.DEBUG,

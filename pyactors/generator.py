@@ -21,9 +21,6 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-import logging
-_logger = logging.getLogger(__name__)
-
 from pyactors import Actor
 from pyactors import AF_GENERATOR
 from pyactors.inboxes import DequeInbox as Inbox
@@ -31,18 +28,16 @@ from pyactors.inboxes import DequeInbox as Inbox
 class GeneratorActor(Actor):
     ''' Generator Actor
     '''
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(GeneratorActor, self).__init__(name)
+        super(GeneratorActor, self).__init__(name=name, logger=logger)
         
         # inbox
         self.inbox = Inbox()
         
         # Actor Family
         self._family = AF_GENERATOR
-
-        self._logger = logging.getLogger('%s.GeneratorActor' % __name__)
 
     def start(self):
         ''' start actor

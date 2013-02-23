@@ -21,9 +21,6 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-import logging
-_logger = logging.getLogger(__name__)
-
 import threading
 
 from pyactors import AF_THREAD
@@ -32,10 +29,10 @@ from pyactors.generator import GeneratorActor
 class ThreadedGeneratorActor(GeneratorActor):
     ''' Threaded GeneratorActor
     '''
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        super(ThreadedGeneratorActor,self).__init__(name=name)
+        super(ThreadedGeneratorActor,self).__init__(name=name, logger=logger)
         
         # Actor Family
         self._family = AF_THREAD
@@ -45,8 +42,6 @@ class ThreadedGeneratorActor(GeneratorActor):
 
         self._thread = threading.Thread(name=self._name, target=self.run)
         self._thread.daemon = True
-
-        self._logger = logging.getLogger('%s.ThreadedGeneratorActor' % __name__)
 
     @property
     def processing(self):

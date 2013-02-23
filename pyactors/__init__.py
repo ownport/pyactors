@@ -24,8 +24,6 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import uuid
 import logging
-import logging.handlers
-_logger = logging.getLogger(__name__)
 
 try:
     import settings
@@ -41,10 +39,13 @@ AF_PROCESS      = 3
 class Actor(object):
     ''' Base class for creation actors
     '''
-    def __init__(self, name=None):
+    def __init__(self, name=None, logger=None):
         ''' __init__
         '''
-        self._logger = logging.getLogger('%s.Actor' % __name__)
+        if logger is None:
+            self.logger = logging.getLogger('%s.Actor' % __name__)
+        else:
+            self.logger = logger
 
         # actor name
         if not name:
@@ -254,7 +255,7 @@ class Actor(object):
     def supervise(self):        
         ''' supervise loop
         '''
-        self._logger.debug('supervise started')
+        self.logger.debug('supervise started')
         while self.processing:
             stopped_children = 0
             for child in self.children:
@@ -271,7 +272,7 @@ class Actor(object):
 
             if len(self.children) == stopped_children:
                 break
-        self._logger.debug('supervise stopped')
+        self.logger.debug('supervise stopped')
             
 class  ActorSystem(Actor):
     ''' Actor System
