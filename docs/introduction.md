@@ -69,4 +69,13 @@ actor.stop()
 ```
 More examples how to use actors with pyactors can be founded in [unittests](https://github.com/ownport/pyactors/tree/master/tests)
 
+## Actor's children matrix
+
+ | GeneratorActor | GreenletActor | ThreadedGeneratorActor | ForkedGeneratorActor | ForkedGreenletActor
+GeneratorActorTest | | | | |
+GreenletActor | | | | |
+ThreadedGeneratorActor | | | | |
+ForkedGeneratorActor | | | | |
+ForkedGreenletActor | | | | |
+
 
