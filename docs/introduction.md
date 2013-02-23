@@ -72,6 +72,7 @@ More examples how to use actors with pyactors can be founded in [unittests](http
 ## Actor's children matrix
 
  | GeneratorActor | GreenletActor | ThreadedGeneratorActor | ForkedGeneratorActor | ForkedGreenletActor
+--- | --- | --- | --- | --- | ---
 GeneratorActorTest | | | | |
 GreenletActor | | | | |
 ThreadedGeneratorActor | | | | |
