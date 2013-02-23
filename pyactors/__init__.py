@@ -38,18 +38,6 @@ AF_GREENLET     = 1
 AF_THREAD       = 2
 AF_PROCESS      = 3
 
-def network_logger( name=__name__, level=logging.DEBUG,
-                    host='127.0.0.1', port=logging.handlers.DEFAULT_TCP_LOGGING_PORT):
-    ''' return network logger
-    '''
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    socketHandler = logging.handlers.SocketHandler(host, port)
-    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
-    socketHandler.setFormatter(formatter)
-    logger.addHandler(socketHandler)
-    return logger
-
 class Actor(object):
     ''' Base class for creation actors
     '''
