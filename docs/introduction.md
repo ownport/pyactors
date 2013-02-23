@@ -28,7 +28,7 @@ At the moment pyactors supported only 4 approaches for working with actors: gene
 - ForkedGreenletActor, the same as GreenletActor but the actor created in separated process
 
 GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The principle is the same as for greenlet but based on python generators. Switchover between actors performed by `yield` inside `loop()` method. The example of GeneratorActor:
-```
+```python
 class TestActor(GeneratorActor):
     def loop(self):
         for i in range(10):
@@ -40,7 +40,7 @@ class TestActor(GeneratorActor):
         self.stop()
 ```
 The same actor but based on greenlet will be:
-```
+```python
 class TestActor(GreenletActor):
     def loop(self):
         for i in range(10):
