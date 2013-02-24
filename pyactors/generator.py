@@ -78,7 +78,7 @@ class GeneratorActor(Actor):
                 if not self.run_once():
                     break
             except Exception, err:
-                self._logger(err)
+                self.logger.error("%s, %s" % (self, err))
                 break
                     
                 

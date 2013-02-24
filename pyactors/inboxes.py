@@ -35,9 +35,9 @@ class DequeInbox(object):
         '''
         self.__inbox = collections.deque()
         if logger is None:
-            self._logger = logging.getLogger('%s.DequeInbox' % __name__)
+            self.logger = logging.getLogger('%s.DequeInbox' % __name__)
         else:
-            self._logger = logger
+            self.logger = logger
                     
     def get(self):
         ''' get data from inbox 
@@ -100,9 +100,9 @@ class ProcessInbox(object):
         self.__inbox = multiprocessing.Queue()
         
         if logger is None:
-            self._logger = logging.getLogger('%s.ProcessInbox' % __name__)
+            self.logger = logging.getLogger('%s.ProcessInbox' % __name__)
         else:
-            self._logger = logger
+            self.logger = logger
 
     def get(self):
         ''' get data from inbox 

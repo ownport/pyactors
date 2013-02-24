@@ -268,7 +268,7 @@ class Actor(object):
                         try:
                             child.run_once()
                         except Exception, err:
-                            self._logger.error(err)
+                            self.logger.error('%s, %s' % (child, err))
                 else:
                     stopped_children += 1
                 yield
