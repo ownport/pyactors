@@ -16,7 +16,7 @@ test:
 test-with-coverage:
 	@ echo 'Remove old log files'
 	@ touch logs/tmp.log
-	@ rm logs/*.logs
+	@ rm logs/*.log
 	@ echo 'Running tests'
 	@ nosetests --with-coverage
 	@ echo 'Tests completed'
