@@ -57,11 +57,17 @@ class GeneratorActor(Actor):
                 self.processing_loop.next()   
             except StopIteration:
                 self.processing_loop = None
+            except Exception, err:
+                self.logger.error('%s, %s' % (self, err.message))
+                self.processing_loop = None
         # children supervising    
         if self.supervise_loop:
             try:
                 self.supervise_loop.next()         
             except StopIteration:
+                self.supervise_loop = None
+            except Exception, err:
+                self.logger.error('%s, %s' % (self, err.message))
                 self.supervise_loop = None
                 
         if self.processing_loop is not None or self.supervise_loop is not None:
@@ -74,11 +80,7 @@ class GeneratorActor(Actor):
         ''' run actor
         '''
         while self.processing:
-            try:
-                if not self.run_once():
-                    break
-            except Exception, err:
-                self.logger.error("%s, %s" % (self, err))
+            if not self.run_once():
                 break
                     
                 

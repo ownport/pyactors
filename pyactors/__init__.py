@@ -265,10 +265,7 @@ class Actor(object):
                 if child.processing:
                 #if child.is_alive():
                     if child.family in (AF_GENERATOR, AF_GREENLET):
-                        try:
-                            child.run_once()
-                        except Exception, err:
-                            self.logger.error('%s, %s' % (child, err))
+                        child.run_once()
                 else:
                     stopped_children += 1
                 yield
