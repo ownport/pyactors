@@ -128,6 +128,24 @@ class GeneratorActorTest(unittest.TestCase):
         parent.run()
         self.assertEqual(parent.inbox.get(), 'message from sender') 
 
+    def test_failed_actor(self):
+        ''' test_generator_actors.test_failed_actor
+        '''
+        class FailedActor(GeneratorActor):
+            def loop(self):
+                while True:
+                    raise RuntimeError('Failed')
+                    yield
+        
+        test_name = 'test_generator_actors.test_failed_actor'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+        parent = GeneratorActor(logger=logger)
+        parent.add_child(FailedActor())
+        parent.start()
+        parent.run()
+        #self.assertRaises(RuntimeError, )
+        
 
 
 

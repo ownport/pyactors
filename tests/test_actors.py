@@ -224,8 +224,7 @@ class ActorTest(unittest.TestCase):
         self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='grandparent')), 1)
         self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='parent')), 3)
         self.assertEqual(len(grandparent.children[0].children[0].find(actor_name='child')), 2)
-        
-        
+                
 if __name__ == '__main__':
     unittest.main()
         
