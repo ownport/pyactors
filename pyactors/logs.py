@@ -24,26 +24,31 @@ POSSIBILITY OF SUCH DAMAGE."""
 import logging
 import logging.handlers
 
-def file_logger(name, filename):
-    ''' returns file logger
+def get_logger(name=__name__, level=logging.DEBUG, handler=None):
+    ''' return logger
     '''
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
+    if handler is not None:
+        formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)        
+    return logger
+
+def file_logger(name=__name__, level=logging.DEBUG, filename=None):
+    ''' returns file logger
+    '''
+    if filename is None:
+        raise RuntimeError('Incorrect filename for logger: %s' % filename)
     file_handler = logging.FileHandler(filename)
-    logger.addHandler(file_handler)
-    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
-    file_handler.setFormatter(formatter)
+    logger = get_logger(name=name, level=level, handler=file_handler)
     return logger
 
 def network_logger( name=__name__, level=logging.DEBUG,
                     host='127.0.0.1', port=logging.handlers.DEFAULT_TCP_LOGGING_PORT):
     ''' return network logger
     '''
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
     socketHandler = logging.handlers.SocketHandler(host, port)
-    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
-    socketHandler.setFormatter(formatter)
-    logger.addHandler(socketHandler)
+    logger = get_logger(name=name, level=level)
     return logger
 
