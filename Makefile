@@ -7,14 +7,16 @@ clean-tmp-files:
 	
 test:
 	@ echo 'Remove old log files'
-	@ rm logs/*
+	@ touch logs/tmp.log
+	@ rm logs/*.log
 	@ echo 'Running tests'
 	@ nosetests
 	@ echo 'Tests completed'
     
 test-with-coverage:
 	@ echo 'Remove old log files'
-	@ rm logs/*
+	@ touch logs/tmp.log
+	@ rm logs/*.logs
 	@ echo 'Running tests'
 	@ nosetests --with-coverage
 	@ echo 'Tests completed'
