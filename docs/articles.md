@@ -24,6 +24,17 @@ An actor has the following characteristics:
 
 - [Notes from Akka documentation, Release 2.10, Typesafe Inc.](https://github.com/ownport/pyactors/blob/master/docs/articles.md)
 
+
+## Pykka
+
+[Pykka](https://github.com/jodal/pykka) is a Python implementation of the actor model. The actor model introduces some simple rules to control the sharing of state and cooperation between execution units, which makes it easier to build concurrent applications.
+
+## PARLEY, Python Actor Runtime LibrarY*
+
+[PARLEY](http://osl.cs.uiuc.edu/parley/) is an API for writing Python programs that implement the Actor model of distributed systems, in which lightweight concurrent processes communicate through asynchronous message-passing. Actor systems typically are easier to write and debug than traditional concurrent programs that use locks and shared memory.
+
+PARLEY can run using either traditional native threads, greenlets (lightweight threads), or Stackless Python's tasklets. A program written using PARLEY can choose between these models by changing a single line of code.
+
 ## Gevent
 
 [gevent](http://www.gevent.org/) is a Python networking library that uses greenlet to provide a synchronous API on top of libevent event loop.
