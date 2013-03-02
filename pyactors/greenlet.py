@@ -41,6 +41,11 @@ class GreenletActor(Actor):
         # Actor Family
         self._family = AF_GREENLET
 
+    def _handle_exception(self, actor):
+        ''' handle greenlet exception
+        '''
+        self.logger.error('%s, %s' % (self, actor.exception))
+
     def sleep(self, timeout=0):
         ''' actor sleep for timeout
         '''
@@ -54,6 +59,7 @@ class GreenletActor(Actor):
             self.supervise_loop = self.supervise()
         else:
             self.processing_loop = gevent.spawn(self.loop)
+            self.processing_loop.link_exception(self._handle_exception)
 
     def stop(self):
         ''' stop actor
@@ -87,10 +93,6 @@ class GreenletActor(Actor):
         ''' run actor
         '''
         while self.processing:
-            try:
-                if not self.run_once():
-                    break
-            except Exception, err:
-                self.logger.error('%s, %s' % (self, err))
+            if not self.run_once():
                 break
 

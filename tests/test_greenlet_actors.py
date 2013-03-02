@@ -5,6 +5,7 @@ if '' not in sys.path:
 import unittest
 
 from pyactors.logs import file_logger
+from pyactors.greenlet import GreenletActor
 from pyactors.exceptions import EmptyInboxException
 
 from tests import TestGreenletActor as TestActor
@@ -124,6 +125,25 @@ class GeventActorTest(unittest.TestCase):
         parent.run()
         parent.stop()       
         self.assertEqual(parent.inbox.get(), 'message from sender')
+
+    def test_failed_actor(self):
+        ''' test_greenlet_actors.test_failed_actor
+        '''
+        class FailedActor(GreenletActor):
+            def loop(self):
+                while True:
+                    raise RuntimeError('Failed')
+                    self.sleep()
+        
+        test_name = 'test_greenlet_actors.test_failed_actor'
+        logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+        parent = GreenletActor(logger=logger)
+        parent.add_child(FailedActor(logger=logger))
+        parent.start()
+        parent.run()
+        #self.assertRaises(RuntimeError, )
+
 
 if __name__ == '__main__':
     unittest.main()
