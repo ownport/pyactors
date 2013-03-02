@@ -68,9 +68,6 @@ class Actor(object):
         # children dictionary
         self._children = dict()
         
-        # used for checking if actor is waiting messages or not
-        self._waiting = False
-
         # used for checking if actor is processing 
         self._processing = False
 
@@ -98,36 +95,6 @@ class Actor(object):
         if self._family is None:
             raise RuntimeError('Actor family is not specified, %s' % self._name)
         return self._family
-
-    @property
-    def waiting(self):
-        ''' return True if actor is waiting for new messages
-        '''
-        return self._waiting
-
-    @waiting.setter
-    def waiting(self, value):
-        ''' set waiting status 
-        '''
-        if isinstance(value, bool):
-            self._waiting = value
-        else:
-            raise RuntimeError('Incorrect waiting type, %s. It must be boolean' % value)
-
-    @property
-    def processing(self):
-        ''' return True if actor is processing 
-        '''
-        return self._processing
-
-    @processing.setter
-    def processing(self, value):
-        ''' set processing status 
-        '''
-        if isinstance(value, bool):
-            self._processing = value
-        else:
-            raise RuntimeError('Incorrect processing type, %s. It must be boolean' % value)
 
     def add_child(self, actor):
         ''' add actor's child
@@ -247,10 +214,29 @@ class Actor(object):
         '''
         self.inbox.put(message)
 
+    def on_start(self):
+        ''' on start handler
+        '''
+        pass
+
+    def on_stop(self):
+        ''' on stop handler
+        '''
+        pass
+    
+    def _handle_failue(self, )
+    
+    def on_failure(self, exception):
+        ''' on failure handler
+        '''
+        pass
+
     def _loop(self):
         ''' main loop 
         '''
-        raise RuntimeError('Actor.loop() is not implemented')
+        
+        while self._processing:
+            
 
     def supervise(self):        
         ''' supervise loop
