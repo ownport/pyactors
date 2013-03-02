@@ -26,6 +26,8 @@ import sys
 import uuid
 import logging
 
+from inbox import DequeInbox
+
 class Actor(object):
     ''' Base class for creating Actors 
     '''
@@ -46,8 +48,9 @@ class Actor(object):
         else:
             self.logger = logger
 
-        # actor's inbox
-        self.inbox = None
+        # actor's inbox, DequeInbox is default inbox.
+        # You can reassign inbox in your Actor class
+        self.inbox = DequeInbox()
  
         # actor's parent
         self.parent = None
