@@ -247,7 +247,7 @@ class Actor(object):
         '''
         self.inbox.put(message)
 
-    def loop(self):
+    def _loop(self):
         ''' main loop 
         '''
         raise RuntimeError('Actor.loop() is not implemented')
