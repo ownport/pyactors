@@ -24,7 +24,6 @@ test-with-coverage:
 	@ nosetests --with-coverage
 	@ echo 'Tests completed'
 	@ for log in `ls logs`;do [ ! -s logs/$$log ] && rm logs/$$log; done
-	@ echo 'Tests completed'
 	@ echo 'Created logs:'
 	@ ls -l logs/
 
