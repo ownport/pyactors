@@ -1,5 +1,4 @@
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
-__version__ = '0.3.0-new-design' 
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -22,33 +21,5 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-'''
-Utilities
-'''        
+import gevent
 
-def joinall(actors):
-    ''' wait until actors finished
-    '''
-    stopped_children = list()
-    if not isinstance(actors, (list, tuple)):
-        raise RuntimeError('Actors shoud be list')
-        
-    while True:
-        for actor in actors:
-            if actor.address not in stopped_children:
-                if not actor.run_once():
-                    stopped_children.append(actor.address)
-                    
-        if len(actors) == len(stopped_children):
-            break
-                
-
-def killall(actors):
-    ''' kill all actors in the list
-    '''
-    if not isinstance(actors, (list, tuple)):
-        raise RuntimeError('Actors shoud be list')
-        
-    for actor in actors:
-        actor.stop()
-    
