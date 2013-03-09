@@ -140,7 +140,7 @@ class Actor(object):
         # stop child-actors
         for child in self.children:
             child.stop()
-            
+        
         try:
             self.on_stop()
         except:
@@ -154,17 +154,26 @@ class Actor(object):
         '''
         pass
 
+    def _handle_system_message(self, message):
+        ''' handle system message 
+        '''
+        if not isinstance(message, dict):
+            return
+        
+        msg_type = message.get('type', None)
+        if msg_type and msg_type == 'stop' and message.get('sender','') == self.parent.address:
+            self.stop()
+
     def _handle_message(self, message):
         ''' handle pyactors message
         
         returns True if the message is pyactors (system) message
         '''
-        if not isinstance(message, dict):
-            return False
-        
-        if message.get('system-msg', None):
-            return True            
-        return False
+        if isinstance(message, dict) and message.get('system-msg', None):
+            self._handle_system_message(message['system-msg'])         
+            return
+               
+        self.on_receive(message)
 
     def _handle_failure(self, exception_type, exception_value, traceback):
         ''' handle failure
@@ -203,8 +212,7 @@ class Actor(object):
 
             if message:
                 try:
-                    if not self._handle_message(message):
-                        self.on_receive(message)
+                    self._handle_message(message)
                 except:
                     self._handle_failure(*sys.exc_info())
             
