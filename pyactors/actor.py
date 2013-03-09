@@ -217,18 +217,16 @@ class Actor(object):
     def _supervise_loop(self):
         ''' supervise loop
         '''
-        stopped_children = list()
         while self._processing:
             if self.children == 0:
                 break
-            # stopped_children = 0
             for child in self.children:
-                if child.address not in stopped_children:
-                    self.logger.debug('%s.supervise_loop(), child.run_once(): %s' % (self.name, child))
-                    if not child.run_once():
-                        stopped_children.append(child.address)
-            if len(self.children) == len(stopped_children):
-                self.logger.debug('%s.supervise_loop(), no active children (%s)' % (self.name, len(stopped_children)))
+                self.logger.debug('%s.supervise_loop(), child.run_once(): %s' % (self.name, child))
+                if not child.run_once():
+                    # child completed its job, remove it from children list
+                    self._children.pop(child.address)
+            if len(self.children) == 0:
+                self.logger.debug('%s.supervise_loop(), no active children ' % self.name)
                 break
             yield
     
