@@ -119,8 +119,8 @@ class Actor(object):
         '''
         pass
 
-    def on_send(self):
-        ''' on send message handler 
+    def on_handle(self):
+        ''' on handle event 
         '''
         pass
 
@@ -209,7 +209,7 @@ class Actor(object):
                     self._handle_failure(*sys.exc_info())
             
             try:    
-                self.on_send()
+                self.on_handle()
             except:
                 self._handle_failure(*sys.exc_info())
             yield
