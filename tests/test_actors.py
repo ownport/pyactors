@@ -23,10 +23,19 @@ def test_actors_as_str():
     actor = SimpleActor()
     assert str(actor) == 'SimpleActor[%s]' % actor.address    
 
-def test_actor_run():
-    ''' test_actors.test_actor_run
+def test_actors_family():
+    ''' test_actors.test_actors_no_family
     '''
-    test_name = 'test_actors.test_actor_run'
+    actor = SimpleActor()
+    try:
+        actor.family
+    except RuntimeError:
+        pass
+
+def test_joinall():
+    ''' test_actors.test_joinall
+    '''
+    test_name = 'test_actors.test_joinall'
     logger = file_logger(name=test_name, filename='logs/%s.log' % test_name)
 
     actor = SimpleActor(logger=logger)
@@ -37,7 +46,7 @@ def test_actor_run():
     except EmptyInboxException:
         pass
 
-def test_actor_killall():
+def test_killall():
     ''' test_actors.test_actor_killall
     '''
     test_name = 'test_actors.test_actor_killall'
@@ -47,10 +56,10 @@ def test_actor_killall():
     actor.start()
     pyactors.killall([actor,])
 
-def test_actor_killall_failed():
-    ''' test_actors.test_actor_killall_failed
+def test_killall_failed():
+    ''' test_actors.test_killall_failed
     '''
-    test_name = 'test_actors.test_actor_killall_failed'
+    test_name = 'test_actors.test_killall_failed'
     logger = file_logger(name=test_name, filename='logs/%s.log' % test_name)
 
     actor = SimpleActor(logger=logger)

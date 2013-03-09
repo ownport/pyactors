@@ -14,6 +14,12 @@ from tests import SenderGeneratorActor as Sender
 from tests import ReceiverGeneratorActor as Receiver
 from tests import TestGeneratorActor as TestActor
 
+def test_family():
+    ''' test_generator_actors.test_family
+    '''
+    actor = TestActor()
+    assert actor.family == pyactors.actor.AF_GENERATOR
+
 def test_run():
     ''' test_generator_actors.test_run
     '''
