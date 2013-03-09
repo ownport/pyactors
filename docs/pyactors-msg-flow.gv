@@ -1,0 +1,16 @@
+digraph pyactors_msg_flow {
+
+    graph [ rankdir = "LR"];
+    node [shape=record,fontname=Arial,fontsize=9];
+    edge [arrowsize=0.5,fontname=Arial,fontsize=9];
+
+    // Nodes
+
+    // Links
+
+    start -> started;
+    started -> stop;
+    stop -> start;
+    started -> died;    
+    died -> start;
+}
