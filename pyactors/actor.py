@@ -255,6 +255,7 @@ class Actor(object):
         supervise_loop = self._supervise_loop()
 
         while self._processing:
+
             # processing_loop
             if processing_loop is not None:
                 self.logger.debug('%s.run(), processing started' % self.name)
@@ -264,8 +265,7 @@ class Actor(object):
                 except StopIteration:
                     self.logger.debug('%s.run(), processing completed' % self.name)
                     processing_loop = None
-                except:
-                    self._handle_failure(*sys.exc_info())
+
             # supervise_loop        
             if supervise_loop is not None:
                 self.logger.debug('%s.run(), supervising started' % self.name)
@@ -275,12 +275,7 @@ class Actor(object):
                 except StopIteration:
                     self.logger.debug('%s.run(), supervising completed' % self.name)
                     supervise_loop = None
-                except:
-                    self._handle_failure(*sys.exc_info())
-            # exit if processing_loop and supervise_loop are None        
-            if (processing_loop is None) and (supervise_loop is None):
-                self.logger.debug('%s.run(), completed' % self.name)
-                break
+
             yield True
         
         self.logger.debug('%s.run(), processing_loop completed' % self.name)

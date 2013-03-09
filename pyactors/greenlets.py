@@ -23,3 +23,18 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import gevent
 
+from pyactors.actor import Actor
+from pyactors.actor import AF_GREENLET
+
+class GreenletActor(Actor):
+    ''' Greenlet Actor
+    '''
+    def __init__(self, name=None, logger=None):
+        ''' __init__
+        '''
+        super(GreenletActor, self).__init__(name=name, logger=logger)
+        
+        # Actor Family
+        self._family = AF_GREENLET
+                    
+         

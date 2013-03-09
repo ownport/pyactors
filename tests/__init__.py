@@ -1,5 +1,6 @@
 from pyactors.actor import Actor 
 from pyactors.generator import GeneratorActor
+from pyactors.greenlets import GreenletActor
 ''' 
 -------------------------------------------
 Basic Actors
@@ -51,7 +52,7 @@ class TestGeneratorActor(GeneratorActor):
             self.logger.debug('%s.on_handle(), message "%s" sent to itself' % (self.name, msg))
         self.logger.debug('%s.on_handle(), messages in child inbox: %s' % (self.name, len(self.inbox)))
 
-class ParentActor(GeneratorActor):
+class ParentGeneratorActor(GeneratorActor):
     ''' Parent Actor
     '''
     def on_handle(self):
@@ -88,4 +89,41 @@ class ReceiverGeneratorActor(GeneratorActor):
                 self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
                 self.send(message)
             self.stop()
+
+''' 
+-------------------------------------------
+Greenlets
+-------------------------------------------
+'''
+class TestGreenletActor(GreenletActor):
+    ''' TestGreenletActor
+    '''
+    def __init__(self, name=None, logger=None, iters=10):
+        super(TestGreenletActor, self).__init__(name=name, logger=logger)
+        self.iters = ['%s:%d' % (self.name, i) for i in range(iters)]
+        self.logger.debug('%s.__init__(), messages in queue: %s' % (self.name, self.iters))
+
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), messages in queue: %s' % (self.name, len(self.inbox)))
+        self.send(message)
+        self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+
+    def on_handle(self):
+        try:        
+            msg = self.iters.pop()
+            self.logger.debug('%s.on_handle(), messages in queue: %s' % (self.name, self.iters))
+        except IndexError:
+            self.logger.debug('%s.stop()' % self.name)
+            self.stop()
+            return
+            
+        if self.parent is not None:
+            self.parent.send(msg)
+            self.logger.debug('%s.on_handle(), message "%s" sent to parent' % (self.name, msg))
+        else:
+            self.send(msg)
+            self.logger.debug('%s.on_handle(), message "%s" sent to itself' % (self.name, msg))
+        self.logger.debug('%s.on_handle(), messages in child inbox: %s' % (self.name, len(self.inbox)))
+
+
 

@@ -2,14 +2,12 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
-import unittest
-
 import pyactors
 from pyactors.logs import file_logger
 from pyactors.generator import GeneratorActor
 from pyactors.exceptions import EmptyInboxException
 
-from tests import ParentActor
+from tests import ParentGeneratorActor as ParentActor
 from tests import SenderGeneratorActor as Sender
 from tests import ReceiverGeneratorActor as Receiver
 from tests import TestGeneratorActor as TestActor
