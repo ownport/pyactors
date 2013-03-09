@@ -18,6 +18,14 @@ The parent actor can send `stop` message to the child actor. As soon as the chil
     'sender': <parent-actor-address>,
 ```
 
+Example, sending "stop" message from parent to children:
+```python
+class Parent(pyactors.actor.Actor):
+    def on_handle(self):
+        for child in self.children:
+            child.send({'system-msg': {'type': 'stop', 'sender': self.address}})
+```
+
 ## Command 'echo-request' and 'echo-response'
 
 Time to time the parent can ask children about their status: is it alive?. It can be done by sending `echo-request` and `echo-response` messages.
