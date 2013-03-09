@@ -37,6 +37,29 @@ def test_actor_run():
     except EmptyInboxException:
         pass
 
+def test_actor_killall():
+    ''' test_actors.test_actor_killall
+    '''
+    test_name = 'test_actors.test_actor_killall'
+    logger = file_logger(name=test_name, filename='logs/%s.log' % test_name)
+
+    actor = SimpleActor(logger=logger)
+    actor.start()
+    pyactors.killall([actor,])
+
+def test_actor_killall_failed():
+    ''' test_actors.test_actor_killall_failed
+    '''
+    test_name = 'test_actors.test_actor_killall_failed'
+    logger = file_logger(name=test_name, filename='logs/%s.log' % test_name)
+
+    actor = SimpleActor(logger=logger)
+    actor.start()
+    try:
+        pyactors.killall(actor)
+    except RuntimeError:
+        pass
+
 def test_raise_error_on_start():
     ''' test_actors.test_raise_error_on_start
     '''
@@ -252,8 +275,7 @@ def test_find_child_by_actor_name():
     assert len(parent.find(actor_name='Child')) == 1
     parent.remove_child(child.address)
     assert len(parent.find(actor_name='Child')) == 0
-
-            
+           
 def test_find_child_by_actor_names():
     ''' test_actors.test_find_child_by_actor_names
     '''
