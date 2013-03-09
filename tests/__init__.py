@@ -37,7 +37,7 @@ class TestGeneratorActor(GeneratorActor):
     def on_handle(self):
         try:        
             msg = self.iters.pop()
-            self.logger.debug('%s.on_send(), message: "%s", iters: %s' % (self.name, msg, self.iters))
+            self.logger.debug('%s.on_handle(), message: "%s", iters: %s' % (self.name, msg, self.iters))
         except IndexError:
             self.logger.debug('%s.stop()' % self.name)
             self.stop()
@@ -45,17 +45,17 @@ class TestGeneratorActor(GeneratorActor):
             
         if self.parent is not None:
             self.parent.send(msg)
-            self.logger.debug('%s.on_send(), message "%s" sent to parent' % (self.name, msg))
+            self.logger.debug('%s.on_handle(), message "%s" sent to parent' % (self.name, msg))
         else:
             self.send(msg)
-            self.logger.debug('%s.on_send(), message "%s" sent to itself' % (self.name, msg))
-        self.logger.debug('%s.on_send(), messages in inbox: %s' % (self.name, len(self.inbox)))
+            self.logger.debug('%s.on_handle(), message "%s" sent to itself' % (self.name, msg))
+        self.logger.debug('%s.on_handle(), messages in inbox: %s' % (self.name, len(self.inbox)))
 
 class ParentActor(GeneratorActor):
     ''' Parent Actor
     '''
     def on_handle(self):
-        self.logger.debug('%s.on_send(), children: %s' % (self.name, self.children))    
+        self.logger.debug('%s.on_handle(), children: %s' % (self.name, self.children))    
         if len(self.children) == 0:
             self.stop()
 
@@ -69,10 +69,10 @@ class SenderGeneratorActor(GeneratorActor):
     '''
     def on_handle(self):
         receivers = [r for r in self.find(actor_name='Receiver')]
-        self.logger.debug('%s.on_send(), receivers: %s' % (self.name, receivers))
+        self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
         for actor in receivers:
             actor.send('message from sender')
-            self.logger.debug('%s.on_send(), message sent to actor %s' % (self.name, actor))
+            self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
             self.stop()
 
 class ReceiverGeneratorActor(GeneratorActor):

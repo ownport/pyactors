@@ -45,7 +45,7 @@ def test_processing_with_children():
     test_name = 'test_generator_actors.test_processing_with_children'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = TestActor(name='Parent', logger=logger, iters=3)      
+    parent = ParentActor(name='Parent', logger=logger)      
     for i in range(5):
         parent.add_child(TestActor(name='Child-%s' % i, logger=logger, iters=3))      
     parent.start()
@@ -58,13 +58,30 @@ def test_processing_with_children():
         except EmptyInboxException:
             break
     
-    assert len(result) == 18, result
-    assert set(result) == set(['Parent:0','Parent:1','Parent:2',\
-                               'Child-0:0','Child-0:1','Child-0:2', \
+    assert len(result) == 15, result
+    assert set(result) == set(['Child-0:0','Child-0:1','Child-0:2', \
                                'Child-1:0','Child-1:1','Child-1:2', \
                                'Child-2:0','Child-2:1','Child-2:2', \
                                'Child-3:0','Child-3:1','Child-3:2', \
                                'Child-4:0','Child-4:1','Child-4:2',]), result
+
+def test_stop_children_in_the_middle():
+    ''' test_generator_actors.test_stop_children_in_the_middle
+    '''    
+    class Parent(pyactors.actor.Actor):
+        def on_handle(self):
+            self.stop()
+            
+    test_name = 'test_generator_actors.test_stop_children_in_the_middle'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+    
+    parent = Parent(name='Parent', logger=logger)
+    for i in range(5):
+        parent.add_child(TestActor(name='Child-%s' % i, logger=logger, iters=3))      
+    parent.start()
+    pyactors.joinall([parent,])
+    
+    assert len(parent.inbox) == 0, 'parent inbox size: %s' % len(parent.inbox)
 
 def test_processing_with_diff_timelife_children():
     ''' test_generator_actors.test_processing_with_diff_timelife_children
@@ -72,7 +89,7 @@ def test_processing_with_diff_timelife_children():
     test_name = 'test_generator_actors.test_processing_with_diff_timelife_children'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = TestActor(name='Parent', logger=logger, iters=5)      
+    parent = ParentActor(name='Parent', logger=logger)      
     for i in range(5):
         parent.add_child(TestActor(name='Child-%s' % i, logger=logger, iters=i))      
     parent.start()
@@ -85,9 +102,8 @@ def test_processing_with_diff_timelife_children():
         except EmptyInboxException:
             break
     
-    assert len(result) == 15, result
-    assert set(result) == set(['Parent:0','Parent:1','Parent:2','Parent:3','Parent:4',\
-                               'Child-1:0','Child-2:0','Child-2:1', \
+    assert len(result) == 10, result
+    assert set(result) == set(['Child-1:0','Child-2:0','Child-2:1', \
                                'Child-3:0','Child-3:1','Child-3:2', \
                                'Child-4:0','Child-4:1','Child-4:2','Child-4:3',]), result
 
