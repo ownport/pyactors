@@ -79,7 +79,7 @@ def test_on_receive():
     ''' test_actors.test_on_receive
     '''
     class OnReceiveActor(Actor):
-        def on_send(self):
+        def on_handle(self):
             self.stop()
             
     test_name = 'test_actors.test_on_receive'
@@ -113,14 +113,14 @@ def test_on_receive_failure():
     except EmptyInboxException:
         pass
     
-def test_on_send_failure():    
-    ''' test_actors.test_on_send_failure
+def test_on_handle_failure():    
+    ''' test_actors.test_on_handle_failure
     '''
     class OnSendFailureActor(SimpleActor):
-        def on_send(self):
+        def on_handle(self):
             raise RuntimeError('on send failure')
         
-    test_name = 'test_actors.test_on_send_failure'
+    test_name = 'test_actors.test_on_handle_failure'
     logger = file_logger(name=test_name, filename='logs/%s.log' % test_name)
 
     actor = OnSendFailureActor(logger=logger)

@@ -7,7 +7,7 @@ Basic Actors
 '''
 class SimpleActor(Actor):
 
-    def on_send(self):
+    def on_handle(self):
         self.send('message')
 
     def on_receive(self, message):
@@ -34,7 +34,7 @@ class TestGeneratorActor(GeneratorActor):
         self.send(message)
         self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
 
-    def on_send(self):
+    def on_handle(self):
         try:        
             msg = self.iters.pop()
             self.logger.debug('%s.on_send(), message: "%s", iters: %s' % (self.name, msg, self.iters))
@@ -54,13 +54,20 @@ class TestGeneratorActor(GeneratorActor):
 class ParentActor(GeneratorActor):
     ''' Parent Actor
     '''
-    def on_send(self):
+    def on_handle(self):
         self.logger.debug('%s.on_send(), children: %s' % (self.name, self.children))    
+        if len(self.children) == 0:
+            self.stop()
 
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
+        self.send(message)
+        self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+                    
 class SenderGeneratorActor(GeneratorActor):
     ''' SenderGeneratorActor
     '''
-    def on_send(self):
+    def on_handle(self):
         receivers = [r for r in self.find(actor_name='Receiver')]
         self.logger.debug('%s.on_send(), receivers: %s' % (self.name, receivers))
         for actor in receivers:
@@ -75,8 +82,10 @@ class ReceiverGeneratorActor(GeneratorActor):
         self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
         if message:
             if self.parent is not None:
+                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
                 self.parent.send(message)
             else:
+                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
                 self.send(message)
             self.stop()
 
