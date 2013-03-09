@@ -81,4 +81,8 @@ ThreadedGenerator | X | X | | |
 ForkedGenerator | X | X | X | |
 ForkedGreenlet | X | X | | |
 
+## System messages
+
+The [system messages](https://github.com/ownport/pyactors/blob/master/docs/system-msg.md) are used in pyactors for actor's management and monitoring. 
+
 
