@@ -4,7 +4,7 @@ The system messages are used in pyactors for actor's management and monitoring. 
 
 ```
 'system-msg': 
-    'command': stop | echo-request | echo-response,
+    'type': stop | echo-request | echo-response, 
     'sender': <actor-address>,
 ```
 
@@ -14,7 +14,7 @@ The parent actor can send `stop` message to the child actor. As soon as the chil
 
 ```
 'system-msg': 
-    'command': stop,
+    'type': stop,
     'sender': <parent-actor-address>,
 ```
 
@@ -24,7 +24,7 @@ Time to time the parent can ask children about their status: is it alive?. It ca
 
 ```
 'system-msg': 
-    'command': echo-request,
+    'type': echo-request,
     'sender': <actor-address (parent)>,
 ```
 
@@ -32,7 +32,7 @@ As response to request
 
 ```
 'system-msg': 
-    'command': echo-response,
+    'type': echo-response,
     'sender': <actor-address (child)>,
 ```
 
