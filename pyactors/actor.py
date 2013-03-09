@@ -157,18 +157,22 @@ class Actor(object):
     def _handle_system_message(self, message):
         ''' handle system message 
         '''
+        self.logger.debug('%s._handle_system_message(), message: %s' % (self.name, message))
         if not isinstance(message, dict):
+            self.logger.debug('%s._handle_system_message(), incorrect system message: %s' % (self.name, message))
             return
         
         msg_type = message.get('type', None)
         if msg_type and msg_type == 'stop' and message.get('sender','') == self.parent.address:
             self.stop()
+            self.logger.debug('%s._handle_system_message(), message "stop" received' % self.name)
 
     def _handle_message(self, message):
         ''' handle pyactors message
         
         returns True if the message is pyactors (system) message
         '''
+        self.logger.debug('%s._handle_message(), message: %s' % (self.name, message))
         if isinstance(message, dict) and message.get('system-msg', None):
             self._handle_system_message(message['system-msg'])         
             return
@@ -226,8 +230,6 @@ class Actor(object):
         ''' supervise loop
         '''
         while self._processing:
-            if self.children == 0:
-                break
             for child in self.children:
                 self.logger.debug('%s.supervise_loop(), child.run_once(): %s' % (self.name, child))
                 if not child.run_once():

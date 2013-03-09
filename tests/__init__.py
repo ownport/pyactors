@@ -27,17 +27,17 @@ class TestGeneratorActor(GeneratorActor):
     def __init__(self, name=None, logger=None, iters=10):
         super(TestGeneratorActor, self).__init__(name=name, logger=logger)
         self.iters = ['%s:%d' % (self.name, i) for i in range(iters)]
-        self.logger.debug('%s.__init__(), iters: %s' % (self.name, self.iters))
+        self.logger.debug('%s.__init__(), messages in queue: %s' % (self.name, self.iters))
 
     def on_receive(self, message):
-        self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
+        self.logger.debug('%s.on_receive(), messages in queue: %s' % (self.name, len(self.inbox)))
         self.send(message)
         self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
 
     def on_handle(self):
         try:        
             msg = self.iters.pop()
-            self.logger.debug('%s.on_handle(), message: "%s", iters: %s' % (self.name, msg, self.iters))
+            self.logger.debug('%s.on_handle(), messages in queue: %s' % (self.name, self.iters))
         except IndexError:
             self.logger.debug('%s.stop()' % self.name)
             self.stop()
@@ -49,7 +49,7 @@ class TestGeneratorActor(GeneratorActor):
         else:
             self.send(msg)
             self.logger.debug('%s.on_handle(), message "%s" sent to itself' % (self.name, msg))
-        self.logger.debug('%s.on_handle(), messages in inbox: %s' % (self.name, len(self.inbox)))
+        self.logger.debug('%s.on_handle(), messages in child inbox: %s' % (self.name, len(self.inbox)))
 
 class ParentActor(GeneratorActor):
     ''' Parent Actor
