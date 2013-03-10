@@ -2,58 +2,43 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
-import unittest
+import gevent
+from gevent.queue import Queue
+
 import pyactors
 
 from pyactors.logs import file_logger
+from pyactors.greenlets import imap_nonblocking
 
-import gevent
-from gevent.pool import Pool
-from gevent.queue import Queue
-from gevent.queue import Empty
+def simple_task(msg):
+    return '%s:handled' % msg
 
-def test_greenlet_wrapper():
-    ''' test_greenlets.test_greenlet_wrapper
+
+def test_gevent_imap():
+    ''' test_greenlets.test_gevent_imap
     '''
-    
-    def func():
-        gevent.sleep(0)
-    
-    gevent.spawn(func)
+        
+    queue = Queue()
+    for i in range(5):
+        queue.put('msg-%d' % i)
+    imap = imap_nonblocking(3, simple_task, queue)        
+    result = [msg for msg in imap if msg is not None]
+    assert result == ['msg-0:handled','msg-1:handled','msg-2:handled',
+                      'msg-3:handled','msg-4:handled',], result
 
-def test_greenlet_pool():
-    ''' test_greenlets.test_greenlet_pool
+def test_gevent_imap_zero_size():
+    ''' test_greenlets.test_gevent_imap_zero_size
     '''
-    def task(message):
-        return '%s-handled' % message
-    
-    pool = Pool(3)
-    for r in pool.imap_unordered(task, range(10)):
-        print r
-    assert True
+    try:
+        imap = imap_nonblocking(0, simple_task, Queue())        
+    except ValueError:
+        pass
 
-def test_greenlet_pool_queue():
-    ''' test_greenlets.test_greenlet_pool_queue
+def test_gevent_imap_none_func():
+    ''' test_greenlets.test_gevent_imap_none_func
     '''
-    def task(queues):
-        in_queue, out_queue = queues
-        try:
-            msg = in_queue.get_nowait()
-        except Empty:
-            return
-        out_queue.put_nowait('%s-handled' % msg)
-    
-    in_queue = Queue()
-    out_queue = Queue()
-    for i in range(10):
-        in_queue.put_nowait('msg-%d' % i)
-    
-    pool = Pool(5)
-    while True:
-        gevent.sleep(0)
-        pool.spawn(task, (in_queue,out_queue))
-        try:
-            print out_queue.get_nowait()
-        except Empty:
-            break
-    assert True
+    try:
+        imap = imap_nonblocking(5, None, Queue())        
+    except ValueError:
+        pass
+
