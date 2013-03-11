@@ -19,10 +19,10 @@ The actor can create new actors as a child by `add_child()` method or remove it 
 
 ## Actor types
 
-At the moment pyactors supported only 4 approaches for working with actors: generators, greenlets, threads and processes. Based on this 5 actors can be created:
+At the moment pyactors supported 4 approaches for working with actors: generators, greenlets, threads and processes. Based on this 5 actors can be created:
 
 - GeneratorActor, based on generators
-- GreenletActor, based on gevent library & greenlets
+- GreenletActor, based on GeneratorActor and imap_nonblocking function
 - ThreadedGeneratorActor, the same as GeneratorActor but the actor created in separated thread
 - ForkedGeneratorActor, the same as GeneratorActor but the actor created in separated process
 - ForkedGreenletActor, the same as GreenletActor but the actor created in separated process
@@ -30,34 +30,23 @@ At the moment pyactors supported only 4 approaches for working with actors: gene
 GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The principle is the same as for greenlet but based on python generators. Switchover between actors performed by `yield` inside `loop()` method. The example of GeneratorActor:
 ```python
 class TestActor(GeneratorActor):
-    def loop(self):
-        for i in range(10):
-            if self.processing:
-                self.parent.send(i)
-            else:
-                break
-            yield
-        self.stop()
+    ''' To be defined soon
+    '''
+    pass
 ```
-The same actor but based on greenlet will be:
+If you need to work with network environment better to use gevent library. For this purpose pyactors contains GreenletActor class. It's the same actor as GeneratorActor but extended with imap_nonblocking function. This function allows you to run many greenlets under one actor.
 ```python
 class TestActor(GreenletActor):
-    def loop(self):
-        for i in range(10):
-            if self.processing:
-                self.parent.send(i)
-            else:
-                break
-            self.sleep()
-        self.stop()
+    ''' To be defined soon
+    '''
+    pass
 ```
-As you can see from the code above the difference between GeneratorActor and GreenletActor is in switching method between actors. In GeneratorActor case it's `yield`. In GreenletActor it's `self.sleep()`.
+As you can see from the code above the difference between GeneratorActor and GreenletActor is predefined method `imap` which contains greenlet code. GreenletActor class was added as template for using gevent library. You need to have another behaviour for working with gevent, you can create your own class based on GeneratorActor.
 
 **Note** Before using GreenletActor please check that gevent is installed
 ```
 $ pip install gevent
 ```
-
 The ThreadedGeneratorActor, ForkedGeneratorActor, ForkedGreenletActor are the same as GeneratorActor and GreenletActor but in first case the actor will be created in separate thread, in second and third cases in separate processes.
 
 To run actor 
