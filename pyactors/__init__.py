@@ -39,9 +39,10 @@ def joinall(actors):
         
     while True:
         for actor in actors:
-            if actor.address not in stopped_children:
-                if not actor.run_once():
-                    stopped_children.append(actor.address)
+            if actor.address in stopped_children:
+                continue
+            if not actor.run_once():
+                stopped_children.append(actor.address)
                     
         if len(actors) == len(stopped_children):
             break
