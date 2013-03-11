@@ -12,7 +12,7 @@ def test_family():
     ''' test_generator_actors.test_family
     '''
     actor = TestActor()
-    assert actor.family == pyactors.actor.AF_GREENLET
+    assert actor.family == pyactors.actor.AF_GENERATOR
 
 def test_run():
     ''' test_greenlet_actors.test_run

@@ -1,6 +1,7 @@
 from pyactors.actor import Actor 
 from pyactors.generator import GeneratorActor
 from pyactors.greenlets import GreenletActor
+from pyactors.greenlets import imap_nonblocking
 ''' 
 -------------------------------------------
 Basic Actors
