@@ -30,7 +30,7 @@ from gevent.greenlet import Greenlet
 
 from pyactors import PY3
 from pyactors.actor import Actor
-from pyactors.actor import AF_GREENLET
+from pyactors.actor import AF_GENERATOR
 
 class NonBlockingIMap(object):
     ''' NonBlockingIMap class
@@ -104,6 +104,6 @@ class GreenletActor(Actor):
         super(GreenletActor, self).__init__(name=name, logger=logger)
         
         # Actor Family
-        self._family = AF_GREENLET
+        self._family = AF_GENERATOR
                     
          
