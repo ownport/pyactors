@@ -29,13 +29,12 @@ from gevent.queue import Empty
 from gevent.greenlet import Greenlet
 
 from pyactors import PY3
-from pyactors.actor import Actor
-from pyactors.actor import AF_GENERATOR
+from pyactors.generator import GeneratorActor
 
 class NonBlockingIMap(object):
     ''' NonBlockingIMap class
     '''
-    def __init__(self, size=1, func=None, iterable=None):
+    def __init__(self, func=None, iterable=None, size=1):
         ''' __init__
         '''
         if size is not None and size <= 0:
@@ -89,21 +88,12 @@ class NonBlockingIMap(object):
         if greenlet.successful():
             self.queue.put(greenlet.value)
 
-def imap_nonblocking(map_size=2, func=None, iterable=None):
+def imap_nonblocking(func=None, iterable=None, map_size=1):
     ''' The same as gevent.imap_unordered() except that process is non-blocking.
     '''
-    return NonBlockingIMap(size=map_size, func=func, iterable=iterable)
+    return NonBlockingIMap(func=func, iterable=iterable, size=map_size)
 
 
-class GreenletActor(Actor):
-    ''' Greenlet Actor
-    '''
-    def __init__(self, name=None, logger=None):
-        ''' __init__
-        '''
-        super(GreenletActor, self).__init__(name=name, logger=logger)
-        
-        # Actor Family
-        self._family = AF_GENERATOR
-                    
+
+
          
