@@ -112,7 +112,11 @@ class Actor(object):
         # start child-actors
         for child in self.children:
             child.start()
-            
+
+        try:
+            self.on_start()
+        except:
+            self._handle_failure(*sys.exc_info())
 
     def on_receive(self, message):
         ''' on receive message handler 
@@ -246,10 +250,6 @@ class Actor(object):
         this method is used only when actor should be started as main one
         '''
         self.logger.debug('%s.run(), started' % self.name)
-        try:
-            self.on_start()
-        except:
-            self._handle_failure(*sys.exc_info())
             
         processing_loop = self._processing_loop()
         supervise_loop = self._supervise_loop()
