@@ -56,7 +56,7 @@ actor.start()
 actor.run()
 actor.stop()
 ```
-More examples how to use actors with pyactors can be founded in [unittests](https://github.com/ownport/pyactors/tree/master/tests)
+More examples how to use actors with pyactors can be founded in [tests](https://github.com/ownport/pyactors/tree/master/tests)
 
 ## Actor's parent/children matrix
 
