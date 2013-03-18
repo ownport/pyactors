@@ -18,7 +18,7 @@ import os
 DEBUG_MODE = True
 
 # The absolute path to the logfile of http server
-HTTP_SERVER_LOGFILE = os.path.join(os.getcwd(), 'log/http_server.log')
+HTTP_SERVER_LOGFILE = os.path.join(os.getcwd(), 'logs/http_server.log')
 
 # The absolute path to the pidfile. It's required when http server is 
 # running as service
