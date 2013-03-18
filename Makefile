@@ -28,3 +28,11 @@ test-with-coverage:
 	@ echo 'Created logs:'
 	@ ls -l logs/
 
+update-ext-deps:
+	@ echo 'Update external dependencies'
+	@ echo '- bottle.py'
+	@ curl -s https://github.com/defnull/bottle/raw/master/bottle.py -o tests/packages/bottle.py
+	@ echo '- pyservice.py'
+	@ curl -s https://raw.github.com/ownport/pyservice/master/pyservice.py -o tests/packages/pyservice.py
+	
+
