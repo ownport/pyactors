@@ -28,11 +28,39 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 import json
+import logging
+import settings
 
 from packages import bottle
 from packages.bottle import request
 
-app = bottle.app()
+from packages import pyservice
+
+# monkey patching for BaseHTTPRequestHandler.log_message
+def log_message(obj, format, *args):
+    logging.info("%s %s" % (obj.address_string(), format % args))
+
+class BottlePyService(pyservice.Process):
+    ''' BottlePyService
+    '''
+    pidfile = settings.HTTP_SERVER_PIDFILE
+    logfile = settings.HTTP_SERVER_LOGFILE
+
+    def __init__(self):
+        ''' __init__
+        '''
+        super(BottlePyService, self).__init__()
+        
+        from BaseHTTPServer import BaseHTTPRequestHandler
+        BaseHTTPRequestHandler.log_message = log_message
+
+    def run(self):
+        logging.info('http_server/bootle-{} server starting up'.format(bottle.__version__))
+        bottle.run(host='localhost', port=8800, debug=settings.DEBUG_MODE)
+    
+# -----------------------------------------------
+# handlers
+# -----------------------------------------------
 
 def get_request_dict():
     ''' get_request_dict
@@ -46,12 +74,20 @@ def get_request_dict():
     d['headers'] = dict(request.headers)
     return json.dumps(d)    
 
-
-@app.route('/', method=['GET'])
-def index():
-    ''' index
+@bottle.route('/', method=['GET',])
+def handle_get_index():
+    ''' handle GET/index
     '''
-    return get_request_dict() 
+    return get_request_dict()
 
-bottle.run(app=app, host='127.0.0.1', port=8800, reloader=True)
+# -----------------------------------------------
+# main
+# -----------------------------------------------
+if __name__ == '__main__':
+    import sys
 
+    if len(sys.argv) == 2 and sys.argv[1] in 'start stop restart status'.split():
+        pyservice.service('http_server.BottlePyService', sys.argv[1])
+    else:
+        print 'usage: http_server.py <start,stop,restart,status>'
+    
