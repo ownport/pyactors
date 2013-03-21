@@ -3,7 +3,7 @@
 """ pyservice module """
 
 __author__ = 'Andrey Usov <http://devel.ownport.net>'
-__version__ = '0.4.2'
+__version__ = '0.4.3'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -26,7 +26,7 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-__all__ = ['Process', 'Service']
+__all__ = ['Process', 'Service', 'service']
 
 import os
 import sys
@@ -47,12 +47,17 @@ sys.path.insert(0, os.getcwd())
 # -----------------------------------------------------
 class Process(object):
     
-    pidfile = None  # Override this field for your class
-    logfile = None  # Override this field for your class
+    # This field is required to be overrided in target class
+    pidfile = None  
+    
+    # This field is required to be overrided in target class
+    logfile = None 
     
     def __init__(self):
+        ''' __init__
+        '''
         atexit.register(self.do_stop())
-    
+
     def do_start(self):
         ''' You should override this method when you subclass Process. 
         It will be called before the process will be runned via Service class. '''
@@ -73,25 +78,22 @@ class Process(object):
         pass
 
 class Service(object):
-    ''' Service class  '''
-    
+    ''' Service class  
+    '''
     def __init__(self, process):
-        ''' init '''
-        
+        ''' init 
+        '''        
         self.process = process
         self.pidfile = Pidfile(process.pidfile)
-        if process.logfile:
-            set_logging(process.__name__, process.logfile)  
-            self.logger = logging.getLogger(process.__name__)          
-
+        self.logger = file_logger(process.__name__, process.logfile)
 
     def _fork(self, fid):
-        ''' fid - fork id'''
-        
+        ''' fid - fork id
+        '''        
         try: 
             pid = os.fork() 
         except OSError, e: 
-            logging.error(
+            self.logger.error(
                 "service._fork(), fork #%d failed: %d (%s)\n" % (fid, e.errno, e.strerror))
             raise OSError(e)  
         return pid
@@ -154,18 +156,16 @@ class Service(object):
     def remove_pid(self):
         if self.pidfile.validate():
             self.pidfile.unlink()
-        logging.info('the task completed, service was stopped')
+        self.logger.info('the task completed, service was stopped')
 
     def start(self):
-        '''
-        Start the service
-        '''
-        
+        ''' Start the service
+        '''        
         # Check for a pidfile to see if the service already runs
         current_pid = self.pidfile.validate()
         if current_pid:
             message = "pidfile %s exists. Service is running already"
-            logging.error(message % current_pid)
+            self.logger.error(message % current_pid)
             print >> sys.stderr, message % current_pid
             return
 
@@ -173,25 +173,30 @@ class Service(object):
         if self.daemonize():
             # create pid file
             try:
-                self.pidfile.create()
+                self.pidfile.link()
             except RuntimeError, err:
-                logging.error('Error during service start, %s' % str(err))
+                self.logger.error('Error during service start, %s' % str(err))
                 print >> sys.stderr, 'Error during service start, %s' % str(err)
                 return
             # activate handler for stop the process
             atexit.register(self.remove_pid)
 
             try:            
+                self.logger.info('process [%s] starting' % self.process.__name__)
                 user_process = self.process()
+                user_process.logger = self.logger
                 if getattr(user_process, 'do_start'):
                     user_process.do_start()
-                user_process.run()
+                if getattr(user_process, 'run'):
+                    user_process.run()
+                else:
+                    msg = 'Method run() is not defined for the process: %s' % self.process 
+                    self.logger.error(msg)
+                    raise RuntimeError(msg)
             except Exception, err:
-                logging.error(err)
+                self.logger.error(err)
                 print err
                 return
-            logging.info('process [%s] started' % self.process.__name__)
-            print >> sys.stdout, 'process [%s] started' % self.process.__name__
 
     def stop(self):
         '''
@@ -200,7 +205,7 @@ class Service(object):
         pid = self.pidfile.validate()
         if not pid:
             message = "pidfile %s does not exist. Service is not running"
-            logging.error(message % self.pidfile.fname)
+            self.logger.error(message % self.pidfile.fname)
             return # not an error in a restart
 
         # Try killing the service process    
@@ -213,9 +218,9 @@ class Service(object):
             if err.find("No such process") > 0:
                 self.pidfile.unlink()
             else:
-                loggin.error('Error during service stop, %s' % str(err))
+                self.logger.error('Error during service stop, %s' % str(err))
                 raise OSError(err)
-        logging.info('service [%s] was stopped by SIGTERM signal' % pid)
+        self.logger.info('service [%s] was stopped by SIGTERM signal' % pid)
     
 class ServiceControl(object):
     
@@ -262,7 +267,7 @@ class Pidfile(object):
         self.fname = fname
         self.pid = None
 
-    def create(self):
+    def link(self):
         ''' create pid file '''
         pid = self.validate()
         if pid:
@@ -314,11 +319,11 @@ class Pidfile(object):
                 except OSError, e:
                     if e[0] == errno.ESRCH:
                         return
-                    raise
+                    raise e
         except IOError, e:
             if e[0] == errno.ENOENT:
                 return
-            raise
+            raise e
 
 # ---------------------------------------------------
 #   Utils
@@ -330,13 +335,16 @@ class Pidfile(object):
         
 DEFAULT_FORMAT = "%(asctime)s pid:%(process)d/{} <%(levelname)s> %(message)s"
 
-def set_logging(process_name, logfile, output_format=DEFAULT_FORMAT, level=logging.DEBUG):
-    ''' set logging '''
-    output_format = output_format.format(process_name)
-    logging.basicConfig(
-                format=output_format, 
-                filename = logfile, 
-                level=logging.DEBUG)
+def file_logger(name, filename):
+    ''' returns file logger
+    '''
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    file_handler = logging.FileHandler(filename)
+    logger.addHandler(file_handler)
+    formatter = logging.Formatter('%(asctime)s %(name)s %(message)s')
+    file_handler.setFormatter(formatter)
+    return logger
 
 def logging_file_descriptors():
     ''' logging file descriptors are used in core.Service.daemonize() '''
@@ -366,7 +374,7 @@ def load_process(process_path):
         import traceback, pkgutil
         tb_tups = traceback.extract_tb(sys.exc_info()[2])
         if pkgutil.__file__.startswith(tb_tups[-1][0]):
-            # If the bottommost frame in our stack was in pkgutil,
+            # If the bottom most frame in our stack was in pkgutil,
             # then we can safely say that this ImportError occurred
             # because the top level class path was not found.
             raise RuntimeError("Unable to load process path: {}:\n{}".format(process_path, e))
