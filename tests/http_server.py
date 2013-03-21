@@ -36,6 +36,12 @@ from packages.bottle import request
 
 from packages import pyservice
 
+try:
+    from gevent import monkey 
+    monkey.patch_socket()
+except ImportError:
+    pass
+
 # monkey patching for BaseHTTPRequestHandler.log_message
 def log_message(obj, format, *args):
     logging.info("%s %s" % (obj.address_string(), format % args))
