@@ -10,9 +10,11 @@ run-tests:
 	@ echo 'Remove old log files'
 	@ touch logs/tmp.log
 	@ rm logs/*.log
+	@ tests/echoserver.py start 
 	@ echo 'Running tests'
 	@ nosetests
 	@ echo 'Tests completed'
+	@ tests/echoserver.py stop 
 	@ for log in `ls logs/`; do [ ! -s logs/$$log ] && rm logs/$$log; done
 	@ echo 'Created logs:'
 	@ ls -l logs/
@@ -21,9 +23,11 @@ run-tests-with-coverage:
 	@ echo 'Remove old log files'
 	@ touch logs/tmp.log
 	@ rm logs/*.log
+	@ tests/echoserver.py start 
 	@ echo 'Running tests'
 	@ nosetests --with-coverage
 	@ echo 'Tests completed'
+	@ tests/echoserver.py stop 
 	@ for log in `ls logs/`; do [ ! -s logs/$$log ] && rm logs/$$log; done
 	@ echo 'Created logs:'
 	@ ls -l logs/
