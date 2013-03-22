@@ -6,7 +6,7 @@ graph:
 clean-tmp-files:
 	@ rm logs/*
 	
-test:
+run-tests:
 	@ echo 'Remove old log files'
 	@ touch logs/tmp.log
 	@ rm logs/*.log
@@ -17,7 +17,7 @@ test:
 	@ echo 'Created logs:'
 	@ ls -l logs/
     
-test-with-coverage:
+run-tests-with-coverage:
 	@ echo 'Remove old log files'
 	@ touch logs/tmp.log
 	@ rm logs/*.log
@@ -30,9 +30,8 @@ test-with-coverage:
 
 update-ext-deps:
 	@ echo 'Update external dependencies'
-	@ echo '- bottle.py'
-	@ curl -s https://raw.github.com/defnull/bottle/master/bottle.py -o tests/packages/bottle.py
 	@ echo '- pyservice.py'
 	@ curl -s https://raw.github.com/ownport/pyservice/master/pyservice.py -o tests/packages/pyservice.py
-	
+	@ pip freeze
+    	
 
