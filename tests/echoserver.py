@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 #
-#   simple server
+#   echo server
 #   used for testing greenlet actors
+#
+#   based on examples/echoserver.py 
+#   from https://github.com/SiteSupport/gevent/blob/master/examples/echoserver.py
 #
 
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
@@ -34,27 +37,35 @@ from packages import pyservice
 # handlers
 # -----------------------------------------------
 
-def handle(socket, address):
-    socket.send("simple server: %s\n" % dir(socket))
-    socket.close()
+def echo(socket, address):
+    ''' echo
+    '''
+    fileobj = socket.makefile()
+    line = fileobj.readline()
+    if not line:
+        fileobj.close()
+        return
+    fileobj.write(line)
+    fileobj.flush()
+    fileobj.close()
 
 # -----------------------------------------------
-# SimpleServerService
+# EchoService
 # -----------------------------------------------
-class SimpleServerService(pyservice.Process):
-    ''' SimpleServerService
+class EchoService(pyservice.Process):
+    ''' EchoService
     '''
-    pidfile = settings.SIMPLE_SERVER_PIDFILE
-    logfile = settings.SIMPLE_SERVER_LOGFILE
+    pidfile = settings.ECHO_SERVER_PIDFILE
+    logfile = settings.ECHO_SERVER_LOGFILE
 
     def run(self):
         ''' run
         '''
         from gevent.server import StreamServer
         
-        self.logger.info('SimpleServerService.run() started')
-        params = (settings.SIMPLE_SERVER_IP_ADDRESS, settings.SIMPLE_SERVER_IP_PORT)
-        StreamServer(params, handle).serve_forever()
+        self.logger.info('EchoService.run() started')
+        params = (settings.ECHO_SERVER_IP_ADDRESS, settings.ECHO_SERVER_IP_PORT)
+        StreamServer(params, echo).serve_forever()
     
 # -----------------------------------------------
 # main
@@ -63,7 +74,7 @@ if __name__ == '__main__':
     import sys
 
     if len(sys.argv) == 2 and sys.argv[1] in 'start stop restart status'.split():
-        pyservice.service('simple_server.SimpleServerService', sys.argv[1])
+        pyservice.service('echoserver.EchoService', sys.argv[1])
     else:
-        print 'usage: simple_server.py <start,stop,restart,status>'
+        print 'usage: echoserver.py <start,stop,restart,status>'
     
