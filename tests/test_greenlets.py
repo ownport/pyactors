@@ -9,6 +9,10 @@ from pyactors.logs import file_logger
 from pyactors.greenlets import imap_nonblocking
 from pyactors.greenlets import GeventInbox as Queue
 
+from tests.echoclient import request_response
+from tests.settings import ECHO_SERVER_IP_ADDRESS
+from tests.settings import ECHO_SERVER_IP_PORT
+
 def simple_task(msg):
     return '%s:handled' % msg
 
@@ -49,10 +53,6 @@ def test_gevent_imap_none_func():
 def test_echoclient():
     ''' test_greenlets.test_echoclient
     '''
-    from tests.echoclient import request_response
-    from tests.settings import ECHO_SERVER_IP_ADDRESS
-    from tests.settings import ECHO_SERVER_IP_PORT
-
     test_name = 'test_greenlets.test_echoclient'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
@@ -60,5 +60,26 @@ def test_echoclient():
     in_msg = request_response(ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, out_msg)
     assert out_msg == in_msg, 'OUT: %s, IN: %s' % (out_msg, in_msg)
         
+def test_echoclient_pool():
+    ''' test_greenlets.test_echoclient_pool
+    '''
+    test_name = 'test_greenlets.test_echoclient_pool'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    def check_result(greenlet):
+        if greenlet.successful():
+            assert greenlet.value.strip() == test_name, \
+                    'wrong response from echo-server: "%s"' % greenlet.value
+        else:
+            assert False, 'Unsuccessful request_response, exception: %s' % greenlet.exception
+
+    pool = gevent.pool.Pool(10)
+    for i in range(100):
+        pool.spawn(
+                    request_response, 
+                    ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, 
+                    test_name + '\n').link(check_result)
+    pool.join()
+
     
     
