@@ -49,29 +49,16 @@ def test_gevent_imap_none_func():
 def test_echoclient():
     ''' test_greenlets.test_echoclient
     '''
-    from gevent import socket
+    from tests.echoclient import request_response
     from tests.settings import ECHO_SERVER_IP_ADDRESS
     from tests.settings import ECHO_SERVER_IP_PORT
 
     test_name = 'test_greenlets.test_echoclient'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    address = (ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT)
     out_msg = 'test_greenlets.test_echoclient\n'
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(address)
-    fileobj = sock.makefile()
-    # send message
-    fileobj.write(out_msg)
-    fileobj.flush()
-    # read message
-    in_msg = fileobj.readline()
-    if not in_msg:
-        fileobj.close()
-        assert False, 'empty message returned from echo server'
-    fileobj.close()
+    in_msg = request_response(ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, out_msg)
     assert out_msg == in_msg, 'OUT: %s, IN: %s' % (out_msg, in_msg)
-    
-    
+        
     
     
