@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 __author__ = 'Andrey Usov <https://github.com/ownport/pyactors>'
 __license__ = """
 Redistribution and use in source and binary forms, with or without modification,
@@ -40,4 +41,15 @@ def request_response(remote_ip, remote_port, message):
         raise RuntimeError('Empty message returned from echo server')
     fileobj.close()
     return message
+
+if __name__ == '__main__':
+    
+    import sys
+    from settings import ECHO_SERVER_IP_ADDRESS
+    from settings import ECHO_SERVER_IP_PORT
+
+    if len(sys.argv) == 2:
+        print request_response(ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, sys.argv[1] + '\n').strip()
+    else:
+        print 'usage: echoclient.py <message>'
 
