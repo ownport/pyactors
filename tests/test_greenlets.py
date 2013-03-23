@@ -47,8 +47,33 @@ def test_gevent_imap_none_func():
     '''
     try:
         imap = imap_nonblocking(None, Queue(), 5)        
+        assert False, 'None function is passed for imap_nonblocking'
     except ValueError:
         pass
+
+def test_gevent_imap_none_queue():
+    ''' test_greenlets.test_gevent_imap_none_queue
+    '''
+    try:
+        imap = imap_nonblocking(lambda x: x, None, 5)        
+        assert False, 'None queue is passed for imap_nonblocking'
+    except ValueError:
+        pass
+
+def test_gevent_imap_none_logger():
+    ''' test_greenlets.test_gevent_imap_none_logger
+    '''
+
+    imap = imap_nonblocking(lambda x: x, Queue(), 5)        
+
+def test_gevent_inbox():
+    ''' test_greenlet.test_gevent_inbox
+    '''
+    test_name = 'test_greenlet_actors.test_greenlet_actors'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+    
+    inbox = Queue(logger=logger)
+    assert len(inbox) == 0, 'gevent inbox size: %d' % len(inbox)
 
 def test_echoclient():
     ''' test_greenlets.test_echoclient
