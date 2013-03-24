@@ -2,6 +2,8 @@ from pyactors.actor import Actor
 from pyactors.generator import GeneratorActor
 from pyactors.greenlets import GreenletActor
 
+from tests.echoclient import request_response
+
 from gevent.queue import Queue as gQueue
 
 ''' 
@@ -124,10 +126,10 @@ class TestGreenletActor(GreenletActor):
             
         if message:
             if self.parent is not None:
-                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
+                self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
                 self.parent.send(message)
             else:
-                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+                self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
                 self.send(message)
         else:
             self.empty_msg_counter += 1
@@ -135,4 +137,33 @@ class TestGreenletActor(GreenletActor):
         if self.empty_msg_counter > 10:
             self.stop()
                     
+class EchoClientGreenletActor(GreenletActor):
+    ''' EchoClientGreenletActor
+    '''
+    @staticmethod
+    def imap_job(message):
+        return request_response(message[0], message[1], 'imap_job:%s\n' % message[2])
+    
+    def on_receive(self, message):
+        ''' on_receive
+        '''
+        self.logger.debug('%s.on_receive(), sent message to imap queue: %s' % (self.name, message))
+        self.imap_queue.put(message)
 
+    def on_handle(self):
+        ''' on_handle
+        '''
+        self.logger.debug('%s.on_handle()' % (self.name,))
+        message = self.imap.next()
+        if message:
+            if self.parent is not None:
+                self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
+                self.parent.send(message)
+            else:
+                self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
+                self.send(message)
+
+        if len(self.inbox) == 0 and len(self.imap_queue) == 0 and self.imap.greenlets_count == 0:            
+            self.stop()
+
+            
