@@ -13,13 +13,16 @@ $ pip install pyactors
 
 The basic class for creation actors is Actor class. It defines the collection of common methods and properties for all actors: name, processing, waiting, start(), stop(), parent, add_child(), children, remove_child(), run(), loop(), supervise(), send(), find(). See [PyActors API](https://github.com/ownport/pyactors/blob/master/docs/api.md) for more details.
 
-All logics for processing data in the actor is located in `loop()` method. There's no embedded mechanism for switching between actors, developers should care about it by themsleves.
+All logics for processing data in the actor is based on sending or receiving messages. Two methods are used for these purposes: on_receive() and on_handle()
 
-The actor can create new actors as a child by `add_child()` method or remove it by `remove_child()`. The actor without children is processing actor and `loop()` method is used for handling data. An actor becomes a superviser if the actor has children. Only `supervise()` method is used for managing children-actors.
+- on_receive() method is called in case when actor received message
+- on_handle() method is called every time when actor gets control. It can be used when actor should send message even incoming message is not received. For example: actor is used as generator for message series.
+
+The actor can create new actors as a child by `add_child()` method or remove it by `remove_child()`. The actor with children performs supervising role for its children. The supervising logic handled in _supervise_loop()
 
 ## Actor types
 
-At the moment pyactors supported 4 approaches for working with actors: generators, greenlets, threads and processes. Based on this 5 actors can be created:
+At the moment pyactors supported 4 approaches for working with actors: generators, greenlets, threads and processes. Based on this 4 actors can be created:
 
 - GeneratorActor, based on generators
 - GreenletActor, based on GeneratorActor and imap_nonblocking function
@@ -27,16 +30,36 @@ At the moment pyactors supported 4 approaches for working with actors: generator
 - ForkedGeneratorActor, the same as GeneratorActor but the actor created in separated process
 - ForkedGreenletActor, the same as GreenletActor but the actor created in separated process
 
-GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The principle is the same as for greenlet but based on python generators. Switchover between actors performed by `yield` inside `loop()` method. The example of GeneratorActor:
+GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The example of GeneratorActor:
 ```python
-class TestActor(GeneratorActor):
-    ''' To be defined soon
+class Receiver(GeneratorActor):
+    ''' Receiver
     '''
-    pass
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
+        if message:
+            self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+            self.send(message)
+            self.stop()
 ```
-If you need to work with network environment better to use gevent library. For this purpose pyactors contains GreenletActor class. It's the same actor as GeneratorActor but extended with imap_nonblocking function. This function allows you to run many greenlets under one actor.
+The actor above waiting for a message, as soon as a message received the actor sends this messages to itself. Another example:
 ```python
-class TestActor(GreenletActor):
+class Sender(GeneratorActor):
+    ''' Sender
+    '''
+    def on_handle(self):
+        receivers = [r for r in self.find(actor_name='Receiver')]
+        self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
+        for actor in receivers:
+            actor.send('message from sender')
+            self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
+        self.stop()
+```
+In this example the actor sends message to all active actors who has a name `Receiver` and then stops it work. If it's needed you can combine both these methods in one actor.
+
+If you need to work with network environment better to use gevent library. This library allows you to avoid blocking network operations. For this purpose pyactors contains GreenletActor class. It's the same actor as GeneratorActor but extended with imap_nonblocking function for running many greenlets under one actor. To get more information about greenlets, please visit [gevent](http://www.gevent.org/) home page. Direct access to imap_nonblocking function is hidden but you can define a method which will be spawned in imap_nonblocking function. GreenletActor has predefined name for this method: 
+```python
+class SimpleActor(GreenletActor):
     ''' To be defined soon
     '''
     pass
