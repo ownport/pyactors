@@ -23,6 +23,7 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 import threading
 
+from pyactors.inbox import QueueInbox
 from pyactors.generator import GeneratorActor
 
 class ThreadedGeneratorActor(GeneratorActor):
@@ -32,6 +33,8 @@ class ThreadedGeneratorActor(GeneratorActor):
         ''' __init__
         '''
         super(ThreadedGeneratorActor,self).__init__(name=name, logger=logger)
+        
+        self.inbox = QueueInbox()
         
         self._thread = threading.Thread(name=self._name, target=self.run)
         self._thread.daemon = True
