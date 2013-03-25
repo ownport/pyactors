@@ -1,6 +1,7 @@
 from pyactors.actor import Actor 
 from pyactors.generator import GeneratorActor
 from pyactors.greenlets import GreenletActor
+from pyactors.thread import ThreadedGeneratorActor
 
 from tests.echoclient import request_response
 
@@ -192,4 +193,31 @@ class ReceiverGreenletActor(GreenletActor):
                 self.send(message)
             self.stop()
 
+''' 
+-------------------------------------------
+ThreadedActors
+-------------------------------------------
+'''
+class TestThreadedGeneratorActor(ThreadedGeneratorActor):
+    ''' TestThreadedGeneratorActor
+    '''
+    def on_receive(self, message):
+        ''' on_receive
+        '''
+        self.logger.debug('%s.on_receive(), sent message to imap_queue: %s' % (self.name, message))
+        if message:
+            if self.parent is not None:
+                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
+                self.parent.send(message)
+            else:
+                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+                self.send(message)
+        
+    def on_handle(self):
+        ''' on_handle
+        '''
+        self.logger.debug('%s.on_handle()' % (self.name,))
+        if len(self.inbox) == 0:
+            self.stop()
+            
             
