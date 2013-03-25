@@ -84,12 +84,12 @@ class QueueInbox(object):
     def put(self, message):
         ''' put message to inbox 
         '''
-        self.__inbox.append(message)
+        self.__inbox.put_nowait(message)
     
     def __len__(self):
         ''' return length of inbox
         '''
-        return len(self.__inbox)
+        return self.__inbox.qsize()
 
 class ProcessInbox(object):
     ''' Inbox from multiprocessing.Queue
