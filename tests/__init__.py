@@ -167,4 +167,29 @@ class EchoClientGreenletActor(GreenletActor):
         if len(self.inbox) == 0 and len(self.imap_queue) == 0 and self.imap.greenlets_count == 0:            
             self.stop()
 
+class SenderGreenletActor(GreenletActor):
+    ''' SenderGreenletActor
+    '''
+    def on_handle(self):
+        receivers = [r for r in self.find(actor_name='Receiver')]
+        self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
+        for actor in receivers:
+            actor.send('message from sender')
+            self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
+            self.stop()
+
+class ReceiverGreenletActor(GreenletActor):
+    ''' ReceiverGreenletActor
+    '''
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
+        if message:
+            if self.parent is not None:
+                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
+                self.parent.send(message)
+            else:
+                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+                self.send(message)
+            self.stop()
+
             

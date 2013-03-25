@@ -10,6 +10,9 @@ from pyactors.exceptions import EmptyInboxException
 from tests import TestGreenletActor as TestActor
 from tests import ParentGeneratorActor as ParentActor
 from tests import EchoClientGreenletActor as EchoClientActor
+from tests import SenderGreenletActor as Sender
+from tests import ReceiverGreenletActor as Receiver
+
 
 from tests.settings import ECHO_SERVER_IP_ADDRESS
 from tests.settings import ECHO_SERVER_IP_PORT
@@ -146,4 +149,17 @@ def test_processing_with_diff_timelife_children():
                                'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
                                'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2', \
                                'imap_job:Child-4:3',]), result
+
+def test_send_msg_between_actors():
+    ''' test_greenlet_actors.test_send_msg_between_actors
+    '''        
+    test_name = 'test_greenlet_actors.test_send_msg_between_actors'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    parent = ParentActor(name='Parent', logger=logger)      
+    parent.add_child(Sender(name='Sender', logger=logger))      
+    parent.add_child(Receiver(name='Receiver', logger=logger))      
+    parent.start()
+    pyactors.joinall([parent,])
+    assert parent.inbox.get() == 'message from sender'  
     
