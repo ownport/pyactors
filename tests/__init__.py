@@ -156,6 +156,7 @@ class EchoClientGreenletActor(GreenletActor):
         self.logger.debug('%s.on_handle()' % (self.name,))
         message = self.imap.next()
         if message:
+            message = message.strip()
             if self.parent is not None:
                 self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
                 self.parent.send(message)

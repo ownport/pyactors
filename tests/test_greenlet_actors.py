@@ -65,6 +65,85 @@ def test_echo_client():
         except EmptyInboxException:
             break
     assert len(result) == 5, result
-    assert result == ['imap_job:%s\n' % test_name for _ in range(5)], result
+    assert result == ['imap_job:%s' % test_name for _ in range(5)], result
 
+def test_echo_client_concurrent_requests():
+    ''' test_greenlet_actors.test_echo_client_concurrent_requests
+    '''
+    test_name = 'test_greenlet_actors.test_echo_client_concurrent_requests'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    parent = ParentActor(name='Parent',logger=logger)
+    child = EchoClientActor(name='EchoClientActor', logger=logger, imap_size=5)
+    parent.add_child(child)
+    for _ in range(20):
+        child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, test_name))
+    parent.start()
+    pyactors.joinall([parent,])
+
+    result = []
+    while True:
+        try:
+            result.append(parent.inbox.get())
+        except EmptyInboxException:
+            break
+    assert len(result) == 20, result
+    assert result == ['imap_job:%s' % test_name for _ in range(20)], result
+
+def test_processing_with_children():
+    ''' test_greenlet_actors.test_processing_with_children
+    '''
+    test_name = 'test_greenlet_actors.test_processing_with_children'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    parent = ParentActor(name='Parent', logger=logger)      
+    for i in range(5):
+        child = EchoClientActor(name='Child-%s' % i, logger=logger)
+        for i in range(3):
+            child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, '%s:%i' % (child.name, i)))
+        parent.add_child(child)      
+    parent.start()
+    pyactors.joinall([parent,])
+
+    result = []
+    while True:
+        try:
+            result.append(parent.inbox.get())
+        except EmptyInboxException:
+            break
+    
+    assert len(result) == 15, result
+    assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2', \
+                               'imap_job:Child-1:0','imap_job:Child-1:1','imap_job:Child-1:2', \
+                               'imap_job:Child-2:0','imap_job:Child-2:1','imap_job:Child-2:2', \
+                               'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
+                               'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2',]), result
+
+def test_processing_with_diff_timelife_children():
+    ''' test_greenlet_actors.test_processing_with_diff_timelife_children
+    '''
+    test_name = 'test_greenlet_actors.test_processing_with_diff_timelife_children'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    parent = ParentActor(name='Parent', logger=logger)      
+    for i in range(5):
+        child = EchoClientActor(name='Child-%s' % i, logger=logger)
+        for ii in range(i):
+            child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, '%s:%d' % (child.name, ii)))
+        parent.add_child(child)      
+    parent.start()
+    pyactors.joinall([parent,])
+
+    result = []
+    while True:
+        try:
+            result.append(parent.inbox.get())
+        except EmptyInboxException:
+            break
+    
+    assert len(result) == 10, result
+    assert set(result) == set(['imap_job:Child-1:0','imap_job:Child-2:0','imap_job:Child-2:1', \
+                               'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
+                               'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2', \
+                               'imap_job:Child-4:3',]), result
     
