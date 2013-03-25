@@ -168,18 +168,19 @@ class GreenletActor(GeneratorActor):
         '''
         pass
     
-    def __init__(self, name=None, logger=None):
+    def __init__(self, name=None, logger=None, imap_size=1):
         ''' __init__
         '''
         super(GreenletActor, self).__init__(name=name, logger=logger)
         self.imap_queue = GeventInbox()
+        self.imap_size = imap_size
 
-    def start(self, map_size=1):
+    def start(self):
         ''' start
         '''
         super(GreenletActor, self).start()
         self.imap = imap_nonblocking(
                                 func=self.imap_job, in_queue=self.imap_queue, 
-                                map_size=map_size, logger=self.logger,
+                                map_size=self.imap_size, logger=self.logger,
                                 nonstop=True)
 
