@@ -33,18 +33,18 @@ Utilities
 def joinall(actors):
     ''' wait until actors finished
     '''
-    stopped_children = list()
+    stopped_actors = list()
     if not isinstance(actors, (list, tuple)):
         raise RuntimeError('Actors shoud be list')
         
     while True:
         for actor in actors:
-            if actor.address in stopped_children:
+            if actor.address in stopped_actors:
                 continue
             if not actor.run_once():
-                stopped_children.append(actor.address)
+                stopped_actors.append(actor.address)
                     
-        if len(actors) == len(stopped_children):
+        if len(actors) == len(stopped_actors):
             break
                 
 
