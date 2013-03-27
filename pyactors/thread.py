@@ -49,7 +49,10 @@ class ThreadedGeneratorActor(GeneratorActor):
         ''' wait until actor finished
         '''
         while True:
-            if not self.run_once():
-                break        
+            if self._running is None:
+                break
+            if not self._running.next():
+                break
+                
         self.stop()
         
