@@ -3,6 +3,10 @@
 #
 import os
 
+# -------------------------------------------
+# Echo server
+# -------------------------------------------
+
 # Echo server IP address
 ECHO_SERVER_IP_ADDRESS = '127.0.0.1'
 
