@@ -289,6 +289,11 @@ class Actor(object):
             return self._running.next()
         else:
             return False
+
+    def join(self):
+        ''' wait until actor finished
+        '''
+        pass
             
     def find(self, address=None, actor_class=None, actor_name=None):
         """ find children by criterias 

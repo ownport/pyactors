@@ -36,7 +36,7 @@ class ThreadedGeneratorActor(GeneratorActor):
         
         self.inbox = QueueInbox()
         
-        self._thread = threading.Thread(name=self._name, target=self.run)
+        self._thread = threading.Thread(name=self._name, target=self.join)
         self._thread.daemon = True
 
     def start(self):
@@ -44,3 +44,12 @@ class ThreadedGeneratorActor(GeneratorActor):
         '''
         super(ThreadedGeneratorActor, self).start()
         self._thread.start()
+
+    def join(self):
+        ''' wait until actor finished
+        '''
+        while True:
+            if not self.run_once():
+                break        
+        self.stop()
+        
