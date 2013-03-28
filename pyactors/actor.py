@@ -285,15 +285,20 @@ class Actor(object):
     def run_once(self):
         ''' run actor once
         '''
-        if self._running is not None:
-            return self._running.next()
-        else:
+        if self._running is None:
             return False
+            
+        return self._running.next()
 
     def join(self):
         ''' wait until actor finished
         '''
         pass
+        '''
+        while True:
+            if not self.run_once():
+                break
+        '''
             
     def find(self, address=None, actor_class=None, actor_name=None):
         """ find children by criterias 
