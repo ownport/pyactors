@@ -28,12 +28,6 @@ import logging
 from pyactors.inbox import DequeInbox
 from pyactors.exceptions import EmptyInboxException
 
-# Actor Family
-AF_GENERATOR    = 0
-AF_GREENLET     = 1
-AF_THREAD       = 2
-AF_PROCESS      = 3
-
 class Actor(object):
     ''' Base class for creating Actors 
     '''
@@ -46,9 +40,6 @@ class Actor(object):
         else:
             self._name = name
  
-        # actor family
-        self._family = None
-
         # actor address
         self.address = uuid.uuid4().hex
 
@@ -89,14 +80,6 @@ class Actor(object):
         ''' return list of actor's children
         '''
         return self._children.values()
-
-    @property
-    def family(self):
-        ''' return actor family
-        '''
-        if self._family is None:
-            raise RuntimeError('Actor family is not specified, %s' % self._name)
-        return self._family
 
     def on_start(self):
         ''' on start event handler

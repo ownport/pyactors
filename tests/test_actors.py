@@ -23,15 +23,6 @@ def test_actors_as_str():
     actor = SimpleActor()
     assert str(actor) == 'SimpleActor[%s]' % actor.address    
 
-def test_actors_family():
-    ''' test_actors.test_actors_no_family
-    '''
-    actor = SimpleActor()
-    try:
-        actor.family
-    except RuntimeError:
-        pass
-
 def test_joinall():
     ''' test_actors.test_joinall
     '''

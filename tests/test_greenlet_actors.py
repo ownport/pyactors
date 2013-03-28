@@ -18,12 +18,6 @@ from tests.settings import ECHO_SERVER_IP_ADDRESS
 from tests.settings import ECHO_SERVER_IP_PORT
 
 
-def test_family():
-    ''' test_greenlet_actors.test_family
-    '''
-    actor = TestActor()
-    assert actor.family == pyactors.actor.AF_GENERATOR
-
 def test_run():
     ''' test_greenlet_actors.test_run
     '''

@@ -22,17 +22,10 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
 from pyactors.actor import Actor
-from pyactors.actor import AF_GENERATOR
 
 class GeneratorActor(Actor):
     ''' Generator Actor
     '''
-    def __init__(self, name=None, logger=None):
-        ''' __init__
-        '''
-        super(GeneratorActor, self).__init__(name=name, logger=logger)
-        
-        # Actor Family
-        self._family = AF_GENERATOR
+    pass
                     
          
