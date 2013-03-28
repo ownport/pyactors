@@ -1,17 +1,15 @@
-from pyactors.actor import Actor 
-from pyactors.generator import GeneratorActor
-from pyactors.greenlets import GreenletActor
-from pyactors.thread import ThreadedGeneratorActor
+from gevent.queue import Queue as gQueue
 
 from tests.echoclient import request_response
 
-from gevent.queue import Queue as gQueue
 
 ''' 
 -------------------------------------------
 Basic Actors
 -------------------------------------------
 '''
+from pyactors.actor import Actor 
+
 class SimpleActor(Actor):
 
     def on_handle(self):
@@ -28,6 +26,8 @@ class SimpleActor(Actor):
 Generators
 -------------------------------------------
 '''
+from pyactors.generator import GeneratorActor
+
 class TestGeneratorActor(GeneratorActor):
     ''' TestGeneratorActor
     '''
@@ -101,6 +101,8 @@ class ReceiverGeneratorActor(GeneratorActor):
 Greenlets
 -------------------------------------------
 '''
+from pyactors.greenlet import GreenletActor
+
 class TestGreenletActor(GreenletActor):
     ''' TestGreenletActor
     '''
@@ -198,6 +200,8 @@ class ReceiverGreenletActor(GreenletActor):
 ThreadedActors
 -------------------------------------------
 '''
+from pyactors.thread import ThreadedGeneratorActor
+
 class TestThreadedGeneratorActor(ThreadedGeneratorActor):
     ''' TestThreadedGeneratorActor
     '''
@@ -245,4 +249,70 @@ class ReceiverThreadedActor(ThreadedGeneratorActor):
                 self.send(message)
             self.stop()
             
+''' 
+-------------------------------------------
+ForkedGeneratorActors
+-------------------------------------------
+'''
+from pyactors.forked import ForkedGeneratorActor
+
+class TestForkedGeneratorActor(ForkedGeneratorActor):
+    ''' TestForkedGeneratorActor
+    '''
+    def on_receive(self, message):
+        ''' on_receive
+        '''
+        self.logger.debug('%s.on_receive(), sent message to imap_queue: %s' % (self.name, message))
+        if message:
+            if self.parent is not None:
+                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
+                self.parent.send(message)
+            else:
+                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+                self.send(message)
+        
+    def on_handle(self):
+        ''' on_handle
+        '''
+        self.logger.debug('%s.on_handle()' % (self.name,))
+        if len(self.inbox) == 0:
+            self.stop()
+
+class SenderForkedGeneratorActor(ForkedGeneratorActor):
+    ''' SenderForkedGeneratorActor
+    '''
+    def on_handle(self):
+        receivers = [r for r in self.find(actor_name='Receiver')]
+        self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
+        for actor in receivers:
+            actor.send('message from sender')
+            self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
+            self.stop()
+
+class ReceiverForkedGeneratorActor(ForkedGeneratorActor):
+    ''' ReceiverForkedGeneratorActor
+    '''
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
+        if message:
+            if self.parent is not None:
+                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
+                self.parent.send(message)
+            else:
+                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
+                self.send(message)
+            self.stop()
             
+''' 
+-------------------------------------------
+ForkedGreenletActors
+-------------------------------------------
+'''
+from pyactors.forked import ForkedGreenletActor
+
+class TestForkedGreenletActor(ForkedGreenletActor):
+    ''' TestForkedGreenletActor
+    '''
+    pass
+    
+                        

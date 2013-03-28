@@ -4,7 +4,7 @@ if '' not in sys.path:
 
 import pyactors
 from pyactors.logs import file_logger
-from pyactors.greenlets import GeventInbox
+from pyactors.greenlet import GeventInbox
 from pyactors.exceptions import EmptyInboxException
 
 from tests import TestGreenletActor as TestActor

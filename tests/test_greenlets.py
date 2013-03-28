@@ -6,8 +6,8 @@ import gevent
 import pyactors
 
 from pyactors.logs import file_logger
-from pyactors.greenlets import imap_nonblocking
-from pyactors.greenlets import GeventInbox as Queue
+from pyactors.greenlet import imap_nonblocking
+from pyactors.greenlet import GeventInbox as Queue
 
 from tests.echoclient import request_response
 from tests.settings import ECHO_SERVER_IP_ADDRESS
