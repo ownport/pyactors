@@ -45,6 +45,11 @@ class ThreadedGeneratorActor(GeneratorActor):
         super(ThreadedGeneratorActor, self).start()
         self._thread.start()
 
+    def run_once(self):
+        ''' run once for threaded actor
+        '''
+        return self._thread.is_alive()
+
     def join(self):
         ''' wait until actor finished
         '''
