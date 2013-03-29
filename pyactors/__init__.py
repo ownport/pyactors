@@ -35,7 +35,7 @@ def joinall(actors):
     '''
     stopped_actors = list()
     if not isinstance(actors, (list, tuple)):
-        raise RuntimeError('Actors shoud be list')
+        raise RuntimeError('Actors shoud be a list')
         
     while True:
         for actor in actors:
