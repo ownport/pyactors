@@ -121,5 +121,5 @@ class ProcessInbox(object):
     def __len__(self):
         ''' return length of inbox
         '''
-        return len(self.__inbox)
+        return self.__inbox.qsize()
 
