@@ -52,6 +52,19 @@ class DequeInbox(object):
         '''
         self.__inbox.append(message)
     
+    def dump(self):
+        ''' dump inbox data to list
+        '''
+        result = list()
+        inbox_size = len(self)
+        
+        while True:
+            try:
+                result.append(self.get())
+            except EmptyInboxException:
+                break
+        return result
+
     def __len__(self):
         ''' return length of inbox
         '''
@@ -83,6 +96,19 @@ class QueueInbox(object):
         '''
         self.__inbox.put_nowait(message)
     
+    def dump(self):
+        ''' dump inbox data to list
+        '''
+        result = list()
+        inbox_size = len(self)
+        
+        while True:
+            try:
+                result.append(self.get())
+            except EmptyInboxException:
+                break
+        return result
+
     def __len__(self):
         ''' return length of inbox
         '''
@@ -114,6 +140,21 @@ class ProcessInbox(object):
         '''
         self.__inbox.put_nowait(message)
     
+    def dump(self):
+        ''' dump inbox data to list
+        '''
+        result = list()
+        inbox_size = len(self)
+        
+        while True:
+            try:
+                result.append(self.get())
+            except EmptyInboxException:
+                pass
+            if len(result) == inbox_size:
+                break
+        return result
+        
     def __len__(self):
         ''' return length of inbox
         '''
