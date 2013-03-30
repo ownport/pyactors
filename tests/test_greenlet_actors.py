@@ -32,12 +32,7 @@ def test_run():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
+    result = parent.inbox.dump()
     assert len(result) == 10, result
     assert result == ['imap_job:%s' % test_name for _ in range(10)], result
 
@@ -55,12 +50,7 @@ def test_echo_client():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
+    result = parent.inbox.dump()
     assert len(result) == 5, result
     assert result == ['imap_job:%s' % test_name for _ in range(5)], result
 
@@ -78,12 +68,7 @@ def test_echo_client_concurrent_requests():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
+    result = parent.inbox.dump()
     assert len(result) == 20, result
     assert result == ['imap_job:%s' % test_name for _ in range(20)], result
 
@@ -102,13 +87,7 @@ def test_processing_with_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-    
+    result = parent.inbox.dump()
     assert len(result) == 15, result
     assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2', \
                                'imap_job:Child-1:0','imap_job:Child-1:1','imap_job:Child-1:2', \
@@ -131,13 +110,7 @@ def test_processing_with_diff_timelife_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-    
+    result = parent.inbox.dump()
     assert len(result) == 10, result
     assert set(result) == set(['imap_job:Child-1:0','imap_job:Child-2:0','imap_job:Child-2:1', \
                                'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
@@ -214,16 +187,7 @@ def test_send_wrong_system_msg():
     parent.start()
     pyactors.joinall([parent,])
     
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-
+    result = parent.inbox.dump()
     assert len(result) == 3, 'parent.inbox: %s messages' % len(result)
     assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2']), result
 
-
-
-    

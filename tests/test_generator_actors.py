@@ -22,12 +22,7 @@ def test_run():
     actor.start()
     pyactors.joinall([actor,])
 
-    result = []
-    while True:
-        try:
-            result.append(actor.inbox.get())
-        except EmptyInboxException:
-            break
+    result = actor.inbox.dump()
     assert len(result) == 10, result
     assert set(result) == set(['Actor:%d' % i for i in range(10)]), result
 
@@ -43,13 +38,7 @@ def test_processing_with_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-    
+    result = parent.inbox.dump()
     assert len(result) == 15, result
     assert set(result) == set(['Child-0:0','Child-0:1','Child-0:2', \
                                'Child-1:0','Child-1:1','Child-1:2', \
@@ -87,13 +76,7 @@ def test_processing_with_diff_timelife_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-    
+    result = parent.inbox.dump()
     assert len(result) == 10, result
     assert set(result) == set(['Child-1:0','Child-2:0','Child-2:1', \
                                'Child-3:0','Child-3:1','Child-3:2', \
