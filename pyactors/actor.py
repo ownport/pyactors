@@ -132,7 +132,7 @@ class Actor(object):
             self.on_stop()
         except:
             self._handle_failure(*sys.exc_info())
-            
+        
         self._processing = False
         #self._running = None
 

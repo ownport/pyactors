@@ -42,11 +42,10 @@ class DequeInbox(object):
     def get(self):
         ''' get data from inbox 
         '''
-        try:
-            result = self.__inbox.popleft()
-        except IndexError:
+        if len(self.__inbox) == 0:
             raise EmptyInboxException
-        return result
+        
+        return self.__inbox.popleft()
     
     def put(self, message):
         ''' put message to inbox 
@@ -74,12 +73,10 @@ class QueueInbox(object):
     def get(self):
         ''' get data from inbox 
         '''
-        try:
-            result = self.__inbox.get_nowait()
-            self.__inbox.task_done()
-        except Queue.Empty:
+        if self.__inbox.empty():
             raise EmptyInboxException
-        return result
+        
+        return self.__inbox.get_nowait()
     
     def put(self, message):
         ''' put message to inbox 
@@ -107,11 +104,10 @@ class ProcessInbox(object):
     def get(self):
         ''' get data from inbox 
         '''
-        try:
-            result = self.__inbox.get_nowait()
-        except Queue.Empty:
+        if self.__inbox.empty():
             raise EmptyInboxException
-        return result
+        
+        return self.__inbox.get_nowait()
     
     def put(self, message):
         ''' put message to inbox 
