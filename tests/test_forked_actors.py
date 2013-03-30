@@ -115,11 +115,16 @@ def test_run():
     pyactors.joinall([parent,])
 
     result = []
+    inbox_size = len(parent.inbox)
+    
     while True:
         try:
             result.append(parent.inbox.get())
         except EmptyInboxException:
+            pass
+        if len(result) == inbox_size:
             break
+            
     assert len(result) == 10, "len(result): %d, %s" % (len(result), result)
     assert result == [test_name for _ in range(10)], result
 
