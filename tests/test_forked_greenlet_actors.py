@@ -71,6 +71,9 @@ class EchoClientGreenletActor(ForkedGreenletActor):
         ''' on_handle
         '''
         self.logger.debug('%s.on_handle()' % (self.name,))
+        if len(self.inbox) == 0 and len(self.imap_queue) == 0 and self.imap.count == 0:            
+            self.stop()
+
         message = self.imap.next()
         if message:
             message = message.strip()
@@ -81,8 +84,6 @@ class EchoClientGreenletActor(ForkedGreenletActor):
                 self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
                 self.send(message)
 
-        if len(self.inbox) == 0 and len(self.imap_queue) == 0 and self.imap.greenlets_count == 0:            
-            self.stop()
 
 class SenderGreenletActor(ForkedGreenletActor):
     ''' SenderGreenletActor
@@ -160,7 +161,7 @@ def test_echo_client_concurrent_requests():
     total_msgs = 20
 
     parent = ForkedParentActor(name='Parent',logger=logger)
-    child = EchoClientGreenletActor(name='EchoClientActor', logger=logger, imap_size=3)
+    child = EchoClientGreenletActor(name='EchoClientActor', logger=logger, imap_size=5)
     parent.add_child(child)
     for _ in range(total_msgs):
         child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, test_name))
