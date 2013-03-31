@@ -72,7 +72,7 @@ def test_stop_children_in_the_middle():
     parent.start()
     pyactors.joinall([parent,])
     
-    # Note: for theaded actors there's no concurrent behaviour. As soon as 
+    # Note: there's no concurrent behaviour for theaded actors. As soon as 
     # threaded actor is started, actor's processing started in the thread and
     # parallel execution controlled by the system. In case of parent actor
     # sends stop message in the middle of execution, parent's inbox should
