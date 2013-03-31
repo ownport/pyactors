@@ -65,10 +65,10 @@ class ForkedGeneratorActor(GeneratorActor):
 class ForkedGreenletActor(GreenletActor):
     ''' Forked GreenletActor
     '''        
-    def __init__(self, name=None, logger=None):
+    def __init__(self, name=None, logger=None, imap_size=1):
         ''' __init__
         '''
-        super(ForkedGeneratorActor,self).__init__(name=name, logger=logger)
+        super(ForkedGreenletActor,self).__init__(name=name, logger=logger, imap_size=imap_size)
         
         self.inbox = Inbox()
         
@@ -78,7 +78,7 @@ class ForkedGreenletActor(GreenletActor):
     def start(self):
         ''' start actor
         '''
-        super(ForkedGeneratorActor, self).start()
+        super(ForkedGreenletActor, self).start()
         self._process.start()
 
     def run_once(self):

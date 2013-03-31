@@ -1,7 +1,5 @@
-from gevent.queue import Queue as gQueue
 
 from tests.echoclient import request_response
-
 
 ''' 
 -------------------------------------------
@@ -248,5 +246,32 @@ class ReceiverThreadedActor(ThreadedGeneratorActor):
                 self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
                 self.send(message)
             self.stop()
+
+''' 
+-------------------------------------------
+ForkedActors
+-------------------------------------------
+'''
+from pyactors.inbox import ProcessInbox
+
+class ForkedParentActor(GeneratorActor):
+    ''' Parent Actor
+    '''
+    def __init__(self, name, logger):
+        ''' __init__
+        '''
+        super(ForkedParentActor, self).__init__(name=name, logger=logger)
+        self.inbox = ProcessInbox()
+    
+    def on_handle(self):
+        self.logger.debug('%s.on_handle(), children: %s' % (self.name, self.children))    
+        if len(self.children) == 0:
+            self.stop()
+
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
+        self.send(message)
+        self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+
             
                         
