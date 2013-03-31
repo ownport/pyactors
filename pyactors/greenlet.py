@@ -102,6 +102,9 @@ class NonBlockingIMap(object):
             self.logger = logging.getLogger('%s.Actor' % __name__)
         else:
             self.logger = logger
+    
+    def __str__(self):
+        return u'%s' % self.__class__
 
     def __iter__(self):
         ''' __iter__
@@ -118,8 +121,7 @@ class NonBlockingIMap(object):
         gevent.sleep()
         value = None
         
-        self.logger.debug('%s, greenlets: %d' % (self, self.count))
-        self.logger.debug('%s, map size: %d' % (self, self.size))
+        self.logger.debug('%s, greenlets curr/max: %d/%d' % (self, self.count, self.size))
 
         if self.count >= self.size:
             return value
@@ -129,7 +131,6 @@ class NonBlockingIMap(object):
             self.logger.debug('%s, task: %s' % (self, task))
             gevent.spawn(self.func, task).link(self._on_result)
             self.count += 1
-            self.logger.debug('%s, active greenlets: %d' % (self, self.count))
         except EmptyInboxException:
             self.logger.debug('%s, empty incoming queue' % (self,))
             pass

@@ -28,18 +28,17 @@ def request_response(remote_ip, remote_port, message):
     ''' sending request, receiving response
     ''' 
     address = (remote_ip, remote_port)
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(address)
-    fileobj = sock.makefile()
-    # send message
-    fileobj.write(message)
-    fileobj.flush()
-    # read message
-    message = fileobj.readline()
-    if not message:
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(address)
+        fileobj = sock.makefile()
+        # send message
+        fileobj.write(message)
+        fileobj.flush()
+        # read message
+        message = fileobj.readline()
+    finally:
         fileobj.close()
-        raise RuntimeError('Empty message returned from echo server')
-    fileobj.close()
     return message
 
 if __name__ == '__main__':
