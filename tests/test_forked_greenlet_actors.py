@@ -172,3 +172,26 @@ def test_echo_client_concurrent_requests():
     assert len(result) == total_msgs, result
     assert result == ['imap_job:%s' % test_name for _ in range(total_msgs)], result
 
+def test_processing_with_children():
+    ''' test_forked_greenlet_actors.test_processing_with_children
+    '''
+    test_name = 'test_forked_greenlet_actors.test_processing_with_children'
+    logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
+
+    parent = ForkedParentActor(name='Parent', logger=logger)      
+    for i in range(5):
+        child = EchoClientGreenletActor(name='Child-%s' % i, logger=logger)
+        for i in range(3):
+            child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, '%s:%i' % (child.name, i)))
+        parent.add_child(child)      
+    parent.start()
+    pyactors.joinall([parent,])
+
+    result = parent.inbox.dump()
+    assert len(result) == 15, result
+    assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2', \
+                               'imap_job:Child-1:0','imap_job:Child-1:1','imap_job:Child-1:2', \
+                               'imap_job:Child-2:0','imap_job:Child-2:1','imap_job:Child-2:2', \
+                               'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
+                               'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2',]), result
+
