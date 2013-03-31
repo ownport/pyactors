@@ -89,7 +89,7 @@ class NonBlockingIMap(object):
         self.func = func
 
         # greenlet counters
-        self.greenlets_count = 0        
+        self.count = 0        
 
         # queues
         if in_queue is None:
@@ -118,18 +118,18 @@ class NonBlockingIMap(object):
         gevent.sleep()
         value = None
         
-        self.logger.debug('%s, greenlets: %d' % (self, self.greenlets_count))
+        self.logger.debug('%s, greenlets: %d' % (self, self.count))
         self.logger.debug('%s, map size: %d' % (self, self.size))
 
-        if self.greenlets_count >= self.size:
+        if self.count >= self.size:
             return value
         try:
             self.logger.debug('%s, getting task' % self)
             task = self._in_queue.get()
             self.logger.debug('%s, task: %s' % (self, task))
             gevent.spawn(self.func, task).link(self._on_result)
-            self.greenlets_count += 1
-            self.logger.debug('%s, active greenlets: %d' % (self, self.greenlets_count))
+            self.count += 1
+            self.logger.debug('%s, active greenlets: %d' % (self, self.count))
         except EmptyInboxException:
             self.logger.debug('%s, empty incoming queue' % (self,))
             pass
@@ -142,14 +142,14 @@ class NonBlockingIMap(object):
             self.logger.debug('%s, empty outgoing queue' % (self,))
             pass
         
-        if not self.nonstop and (not value and self.greenlets_count <= 0):
+        if not self.nonstop and (not value and self.count <= 0):
             raise StopIteration()
         return value
 
     def _on_result(self, greenlet):
         ''' _on_result
         '''
-        self.greenlets_count -= 1
+        self.count -= 1
         if greenlet.successful():
             self._out_queue.put(greenlet.value)
 

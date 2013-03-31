@@ -1,6 +1,3 @@
-
-from tests.echoclient import request_response
-
 ''' 
 -------------------------------------------
 Basic Actors
@@ -25,6 +22,20 @@ Generators
 -------------------------------------------
 '''
 from pyactors.generator import GeneratorActor
+
+class ParentGeneratorActor(GeneratorActor):
+    ''' Parent Actor
+    '''
+    def on_handle(self):
+        self.logger.debug('%s.on_handle(), children: %s' % (self.name, self.children))    
+        if len(self.children) == 0:
+            self.stop()
+
+    def on_receive(self, message):
+        self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
+        self.send(message)
+        self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+                    
 
 class TestGeneratorActor(GeneratorActor):
     ''' TestGeneratorActor
@@ -56,19 +67,6 @@ class TestGeneratorActor(GeneratorActor):
             self.logger.debug('%s.on_handle(), message "%s" sent to itself' % (self.name, msg))
         self.logger.debug('%s.on_handle(), messages in child inbox: %s' % (self.name, len(self.inbox)))
 
-class ParentGeneratorActor(GeneratorActor):
-    ''' Parent Actor
-    '''
-    def on_handle(self):
-        self.logger.debug('%s.on_handle(), children: %s' % (self.name, self.children))    
-        if len(self.children) == 0:
-            self.stop()
-
-    def on_receive(self, message):
-        self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
-        self.send(message)
-        self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
-                    
 class SenderGeneratorActor(GeneratorActor):
     ''' SenderGeneratorActor
     '''
@@ -82,105 +80,6 @@ class SenderGeneratorActor(GeneratorActor):
 
 class ReceiverGeneratorActor(GeneratorActor):
     ''' ReceiverGeneratorActor
-    '''
-    def on_receive(self, message):
-        self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
-        if message:
-            if self.parent is not None:
-                self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
-            else:
-                self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
-                self.send(message)
-            self.stop()
-
-''' 
--------------------------------------------
-Greenlets
--------------------------------------------
-'''
-from pyactors.greenlet import GreenletActor
-
-class TestGreenletActor(GreenletActor):
-    ''' TestGreenletActor
-    '''
-    def __init__(self, name=None, logger=None):
-        super(TestGreenletActor, self).__init__(name=name, logger=logger)
-        self.empty_msg_counter = 0
-    
-    @staticmethod
-    def imap_job(message):
-        return 'imap_job:%s' % message
-
-    def on_receive(self, message):
-        ''' on_receive
-        '''
-        self.logger.debug('%s.on_receive(), sent message to imap_queue: %s' % (self.name, message))
-        self.imap_queue.put(message)
-        self.logger.debug('%s.on_receive(), messages in imap_queue: %d' % (self.name, len(self.imap_queue)))
-        
-    def on_handle(self):
-        ''' on_handle
-        '''
-        self.logger.debug('%s.on_handle()' % (self.name,))
-        message = self.imap.next()
-            
-        if message:
-            if self.parent is not None:
-                self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
-            else:
-                self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
-                self.send(message)
-        else:
-            self.empty_msg_counter += 1
-        
-        if self.empty_msg_counter > 10:
-            self.stop()
-                    
-class EchoClientGreenletActor(GreenletActor):
-    ''' EchoClientGreenletActor
-    '''
-    @staticmethod
-    def imap_job(message):
-        return request_response(message[0], message[1], 'imap_job:%s\n' % message[2])
-    
-    def on_receive(self, message):
-        ''' on_receive
-        '''
-        self.logger.debug('%s.on_receive(), sent message to imap queue: %s' % (self.name, message))
-        self.imap_queue.put(message)
-
-    def on_handle(self):
-        ''' on_handle
-        '''
-        self.logger.debug('%s.on_handle()' % (self.name,))
-        message = self.imap.next()
-        if message:
-            message = message.strip()
-            if self.parent is not None:
-                self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
-            else:
-                self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
-                self.send(message)
-
-        if len(self.inbox) == 0 and len(self.imap_queue) == 0 and self.imap.greenlets_count == 0:            
-            self.stop()
-
-class SenderGreenletActor(GreenletActor):
-    ''' SenderGreenletActor
-    '''
-    def on_handle(self):
-        receivers = [r for r in self.find(actor_name='Receiver')]
-        self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
-        for actor in receivers:
-            actor.send('message from sender')
-            self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
-            self.stop()
-
-class ReceiverGreenletActor(GreenletActor):
-    ''' ReceiverGreenletActor
     '''
     def on_receive(self, message):
         self.logger.debug('%s.on_receive(), message: %s' % (self.name, message))
