@@ -148,49 +148,4 @@ class GeventInbox(object):
         '''
         return self.__inbox.qsize()
 
-class ProcessInbox(object):
-    ''' Inbox from multiprocessing.Queue
-    '''
-    def __init__(self, logger=None):
-        ''' __init__ 
-        '''
-        self.__inbox = multiprocessing.Queue()
-        
-        if logger is None:
-            self._logger = logging.getLogger('%s.ProcessInbox' % __name__)
-        else:
-            self._logger = logger
-
-    def get(self):
-        ''' get data from inbox 
-        '''
-        if self.__inbox.empty():
-            raise EmptyInboxException
-        
-        return self.__inbox.get_nowait()
-    
-    def put(self, message):
-        ''' put message to inbox 
-        '''
-        self.__inbox.put_nowait(message)
-    
-    def dump(self):
-        ''' dump inbox data to list
-        '''
-        result = list()
-        inbox_size = len(self)
-        
-        while True:
-            try:
-                result.append(self.get())
-            except EmptyInboxException:
-                pass
-            if len(result) == inbox_size:
-                break
-        return result
-        
-    def __len__(self):
-        ''' return length of inbox
-        '''
-        return self.__inbox.qsize()
 
