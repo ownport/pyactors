@@ -62,13 +62,22 @@ class ForkedGeneratorActor(GeneratorActor):
                 
         self.stop()
         
-class ForkedGreenletActor(GreenletActor):
+class ForkedGreenletActor(GeneratorActor):
     ''' Forked GreenletActor
     '''        
+    @staticmethod
+    def imap_job(message):
+        ''' imap function for greenlets
+        '''
+        pass
+
     def __init__(self, name=None, logger=None, imap_size=1):
         ''' __init__
         '''
-        super(ForkedGreenletActor,self).__init__(name=name, logger=logger, imap_size=imap_size)
+        super(ForkedGreenletActor,self).__init__(name=name, logger=logger)
+
+        self.imap_queue = Inbox()
+        self.imap_size = imap_size
         
         self.inbox = Inbox()
         
@@ -89,6 +98,12 @@ class ForkedGreenletActor(GreenletActor):
     def join(self):
         ''' wait until actor finished
         '''
+        from pyactors.imap import imap_nonblocking
+        
+        self.imap = imap_nonblocking(
+                                func=self.imap_job, in_queue=self.imap_queue, 
+                                map_size=self.imap_size, logger=self.logger,
+                                nonstop=True, name="%s.imap()" % self.name)
         while True:
             if self._running is None:
                 break

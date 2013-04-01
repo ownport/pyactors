@@ -27,7 +27,16 @@ from gevent import socket
 def request_response(remote_ip, remote_port, message):
     ''' sending request, receiving response
     ''' 
+    print '%s, request_response() start' % message.strip()
     address = (remote_ip, remote_port)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(address)
+    print message.strip(), socket
+    msg_length = sock.send(message)
+    result = sock.recv(msg_length)
+    sock.close()
+    '''
+    fileobj = None
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(address)
@@ -37,9 +46,14 @@ def request_response(remote_ip, remote_port, message):
         fileobj.flush()
         # read message
         message = fileobj.readline()
+    except:
+        pass
     finally:
-        fileobj.close()
-    return message
+        if fileobj:
+            fileobj.close()
+    '''            
+    print '%s, request_response() stop, result: %s' % (message.strip(), result)
+    return result
 
 if __name__ == '__main__':
     

@@ -25,7 +25,10 @@ import Queue
 import logging
 import collections
 import multiprocessing
+
 from pyactors.exceptions import EmptyInboxException
+from gevent.queue import Queue as GeventQueue
+from gevent.queue import Empty as GeventQueueEmpty
 
 class DequeInbox(object):
     ''' Inbox from collections.deque
@@ -109,6 +112,38 @@ class QueueInbox(object):
                 break
         return result
 
+    def __len__(self):
+        ''' return length of inbox
+        '''
+        return self.__inbox.qsize()
+
+class GeventInbox(object):
+    ''' Inbox from gevent.queue.Queue
+    '''
+    def __init__(self, logger=None):
+        ''' __init__ 
+        '''
+        self.__inbox = GeventQueue()
+                    
+        if logger is None:
+            self._logger = logging.getLogger('%s.GeventInbox' % __name__)
+        else:
+            self._logger = logger
+
+    def get(self):
+        ''' get data from inbox 
+        '''
+        try:
+            result = self.__inbox.get_nowait()
+        except GeventQueueEmpty:
+            raise EmptyInboxException
+        return result
+    
+    def put(self, message):
+        ''' put message to inbox 
+        '''
+        self.__inbox.put_nowait(message)
+    
     def __len__(self):
         ''' return length of inbox
         '''

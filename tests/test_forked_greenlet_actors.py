@@ -57,6 +57,8 @@ class EchoClientGreenletActor(ForkedGreenletActor):
     '''
     @staticmethod
     def imap_job(message):
+        ''' imap_job
+        '''
         host = message[0]
         port = message[1]
         return request_response(host, port, 'imap_job:%s\n' % message[2])
@@ -180,7 +182,7 @@ def test_processing_with_children():
 
     parent = ForkedParentActor(name='Parent', logger=logger)      
     for i in range(5):
-        child = EchoClientGreenletActor(name='Child-%s' % i, logger=logger)
+        child = EchoClientGreenletActor(name='Child-%s' % i, logger=logger, imap_size=3)
         for i in range(3):
             child.send((ECHO_SERVER_IP_ADDRESS, ECHO_SERVER_IP_PORT, '%s:%i' % (child.name, i)))
         parent.add_child(child)      
@@ -303,3 +305,6 @@ def test_send_wrong_system_msg():
     assert len(result) == 3, 'parent.inbox: %s messages' % len(result)
     assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2']), result
 
+if __name__ == '__main__':
+    test_processing_with_children()
+    

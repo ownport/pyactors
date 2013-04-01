@@ -2,7 +2,6 @@ import sys
 if '' not in sys.path:
     sys.path.append('')
 
-import gevent
 import pyactors
 
 from pyactors.logs import file_logger
@@ -91,6 +90,8 @@ def test_echoclient_pool():
     test_name = 'test_greenlets.test_echoclient_pool'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
+    from gevent.pool import Pool
+
     def check_result(greenlet):
         if greenlet.successful():
             assert greenlet.value.strip() == test_name, \
@@ -98,7 +99,7 @@ def test_echoclient_pool():
         else:
             assert False, 'Unsuccessful request_response, exception: %s' % greenlet.exception
 
-    pool = gevent.pool.Pool(10)
+    pool = Pool(10)
     for i in range(100):
         pool.spawn(
                     request_response, 

@@ -67,6 +67,10 @@ class EchoService(pyservice.Process):
         params = (settings.ECHO_SERVER_IP_ADDRESS, settings.ECHO_SERVER_IP_PORT)
         StreamServer(params, echo).serve_forever()
     
+def usage():
+    print 'usage: echoserver.py <start,stop,restart,status>'
+
+    
 # -----------------------------------------------
 # main
 # -----------------------------------------------
@@ -76,5 +80,5 @@ if __name__ == '__main__':
     if len(sys.argv) == 2 and sys.argv[1] in 'start stop restart status'.split():
         pyservice.service('echoserver.EchoService', sys.argv[1])
     else:
-        print 'usage: echoserver.py <start,stop,restart,status>'
-    
+        usage()
+        

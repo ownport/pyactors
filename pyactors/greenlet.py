@@ -21,144 +21,9 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-import gevent
-import logging
-
-from gevent.pool import Pool
-from gevent.queue import Queue
-from gevent.queue import Empty 
-from gevent.greenlet import Greenlet
-
-from pyactors import PY3
+from pyactors.inbox import GeventInbox
 from pyactors.generator import GeneratorActor
-from pyactors.inbox import EmptyInboxException
-
-class GeventInbox(object):
-    ''' Inbox from gevent.queue.Queue
-    '''
-    def __init__(self, logger=None):
-        ''' __init__ 
-        '''
-        self.__inbox = Queue()
-                    
-        if logger is None:
-            self._logger = logging.getLogger('%s.GeventInbox' % __name__)
-        else:
-            self._logger = logger
-
-    def get(self):
-        ''' get data from inbox 
-        '''
-        try:
-            result = self.__inbox.get_nowait()
-        except Empty:
-            raise EmptyInboxException
-        return result
-    
-    def put(self, message):
-        ''' put message to inbox 
-        '''
-        self.__inbox.put_nowait(message)
-    
-    def __len__(self):
-        ''' return length of inbox
-        '''
-        return self.__inbox.qsize()
-
-
-class NonBlockingIMap(object):
-    ''' NonBlockingIMap class
-    '''
-    def __init__(self, func=None, in_queue=None, size=1, logger=None, nonstop=False):
-        ''' __init__
-        
-        func        - greenlet function
-        in_queue    - queue for incoming tasks
-        size        - tasks pool size
-        logger      - logger
-        nonstop     - if True, no StopIteration exception
-        '''
-        if size is not None and size <= 0:
-            raise ValueError('size must not be negative and not equal zero: %r' % (size, ))
-        self.size = size
-        
-        self.nonstop = nonstop
-        
-        if func is None:
-            raise ValueError('func must be assigned: %s' % (func, ))
-        self.func = func
-
-        # greenlet counters
-        self.count = 0        
-
-        # queues
-        if in_queue is None:
-            raise ValueError('in_queue must be assigned: %s' % (in_queue, ))
-        self._in_queue = in_queue
-        self._out_queue = GeventInbox()
-        
-        # logger
-        if logger is None:
-            self.logger = logging.getLogger('%s.Actor' % __name__)
-        else:
-            self.logger = logger
-    
-    def __str__(self):
-        return u'%s' % self.__class__
-
-    def __iter__(self):
-        ''' __iter__
-        '''
-        return self
-
-    if PY3:
-        __next__ = next
-        del next
-
-    def next(self):
-        ''' next
-        '''
-        gevent.sleep()
-        value = None
-        
-        self.logger.debug('%s, greenlets curr/max: %d/%d' % (self, self.count, self.size))
-
-        if self.count >= self.size:
-            return value
-        try:
-            self.logger.debug('%s, getting task' % self)
-            task = self._in_queue.get()
-            self.logger.debug('%s, task: %s' % (self, task))
-            gevent.spawn(self.func, task).link(self._on_result)
-            self.count += 1
-        except EmptyInboxException:
-            self.logger.debug('%s, empty incoming queue' % (self,))
-            pass
-            
-        try:
-            self.logger.debug('%s, getting value' % self)
-            value = self._out_queue.get()
-            self.logger.debug('%s, value: %s' % (self, value))
-        except EmptyInboxException:
-            self.logger.debug('%s, empty outgoing queue' % (self,))
-            pass
-        
-        if not self.nonstop and (not value and self.count <= 0):
-            raise StopIteration()
-        return value
-
-    def _on_result(self, greenlet):
-        ''' _on_result
-        '''
-        self.count -= 1
-        if greenlet.successful():
-            self._out_queue.put(greenlet.value)
-
-def imap_nonblocking(func=None, in_queue=None, map_size=1, logger=None, nonstop=False):
-    ''' The same as gevent.imap_unordered() except that process is non-blocking.
-    '''
-    return NonBlockingIMap(func=func, in_queue=in_queue, size=map_size, logger=logger, nonstop=nonstop)
-
+from pyactors.imap import imap_nonblocking
 
 class GreenletActor(GeneratorActor):
     ''' GreenletActor
@@ -183,5 +48,5 @@ class GreenletActor(GeneratorActor):
         self.imap = imap_nonblocking(
                                 func=self.imap_job, in_queue=self.imap_queue, 
                                 map_size=self.imap_size, logger=self.logger,
-                                nonstop=True)
+                                nonstop=True, name="%s.imap()" % self.name)
 
