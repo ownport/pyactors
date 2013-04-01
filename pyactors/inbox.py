@@ -133,11 +133,10 @@ class GeventInbox(object):
     def get(self):
         ''' get data from inbox 
         '''
-        try:
-            result = self.__inbox.get_nowait()
-        except GeventQueueEmpty:
+        if self.__inbox.empty():
             raise EmptyInboxException
-        return result
+        
+        return self.__inbox.get_nowait()
     
     def put(self, message):
         ''' put message to inbox 

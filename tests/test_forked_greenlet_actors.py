@@ -250,6 +250,14 @@ def test_send_stop_msg_to_child():
                 
             if len(self.children) == 0:
                 self.stop()
+
+        def on_receive(self, message):
+            ''' on_receive
+            '''
+            self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
+            self.send(message)
+            self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+
                 
     test_name = 'test_forked_greenlet_actors.test_send_stop_msg_to_child'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 

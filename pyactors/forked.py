@@ -23,7 +23,6 @@ POSSIBILITY OF SUCH DAMAGE."""
 
 from multiprocessing import Process
 
-from pyactors.greenlet import GreenletActor
 from pyactors.generator import GeneratorActor
 from pyactors.inbox import ProcessInbox as Inbox
 
