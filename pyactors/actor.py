@@ -116,6 +116,12 @@ class Actor(object):
         '''
         self.inbox.put(message)
 
+    def _stop(self):
+        ''' stop actor
+        '''
+        if self.children == 0:
+            self._processing = False
+    
     def on_stop(self):
         ''' on stop event handler
         '''
@@ -126,7 +132,9 @@ class Actor(object):
         '''
         # stop child-actors
         for child in self.children:
-            child.stop()
+            # child.stop()
+            stop_message = { 'system-msg': {'type': 'stop', 'sender': self.address } }
+            child.send(stop_message)
         
         try:
             self.on_stop()
@@ -134,7 +142,6 @@ class Actor(object):
             self._handle_failure(*sys.exc_info())
         
         self._processing = False
-        #self._running = None
 
     def on_failure(self, exception_type, exception_value, traceback):
         ''' on failure event handler
