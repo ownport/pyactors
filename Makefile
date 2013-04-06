@@ -1,7 +1,8 @@
 
 graph:
-	@ dot -T png docs/actors-hierarchy.gv -o docs/actors-hierarchy.png && eog docs/actors-hierarchy.png
-	@ dot -T png docs/pyactors-msg-flow.gv -o docs/pyactors-msg-flow.png && eog docs/pyactors-msg-flow.png
+	@ dot -T png docs/actors-hierarchy.gv -o docs/actors-hierarchy.png
+	@ dot -T png docs/pyactors-msg-flow.gv -o docs/pyactors-msg-flow.png
+	@ dot -T png docs/state-diagram.gv -o docs/state-diagram.png && eog docs/state-diagram.png
 
 clean-tmp-files:
 	@ rm logs/*
