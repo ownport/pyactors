@@ -1,0 +1,20 @@
+digraph pyactors_state_diagram {
+
+    // graph [ rankdir = "LR"];
+    node [fontname=Arial,fontsize=9];
+    edge [arrowsize=0.5,fontname=Arial,fontsize=9];
+
+    // Nodes
+
+    // Links
+
+    not_created -> created [label=" create()"];
+    created -> running [label=" start()"];
+    running -> processing;
+    processing -> running;
+    running -> supervising;
+    supervising -> running;
+    running -> stopped [label=" processing/supervising completed"];
+
+}
+
