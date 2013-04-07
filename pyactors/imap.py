@@ -26,7 +26,7 @@ import logging
 
 from pyactors import PY3
 from pyactors.inbox import GeventInbox
-from pyactors.exceptions import EmptyInboxException
+from pyactors.exceptions import EmptyInbox
 
 class NonBlockingIMap(object):
     ''' NonBlockingIMap class
@@ -97,14 +97,14 @@ class NonBlockingIMap(object):
             self.logger.debug('%s, task from queue: %s' % (self._name, task))
             gevent.spawn(self.func, task).link(self._on_result)
             self.count += 1
-        except EmptyInboxException:
+        except EmptyInbox:
             self.logger.debug('%s, empty incoming queue' % (self._name,))
             pass
             
         try:
             value = self._out_queue.get()
             self.logger.debug('%s, result value: %s' % (self._name, value))
-        except EmptyInboxException:
+        except EmptyInbox:
             self.logger.debug('%s, empty outgoing queue' % (self._name,))
             pass
         

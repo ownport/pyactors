@@ -6,9 +6,8 @@ import pyactors
 from pyactors.logs import file_logger
 from pyactors.greenlet import GeventInbox
 from pyactors.greenlet import GreenletActor
-from pyactors.exceptions import EmptyInboxException
 
-from tests import ParentGeneratorActor
+from tests import ParentGeneratorActor as ParentActor
 from tests.settings import ECHO_SERVER_IP_ADDRESS
 from tests.settings import ECHO_SERVER_IP_PORT
 from tests.echoclient import request_response
@@ -41,10 +40,16 @@ class TestGreenletActor(GreenletActor):
         if message:
             if self.parent is not None:
                 self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
+                try:
+                    self.parent.send(message)
+                except:
+                    self.logger.debug('%s.on_handle(), parent stopped: %s' % (self.name, self.parent))
             else:
                 self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
-                self.send(message)
+                try:
+                    self.send(message)
+                except:
+                    self.logger.debug('%s.on_handle(), actor stopped: %s' % (self.name, self))
         else:
             self.empty_msg_counter += 1
         
@@ -76,10 +81,16 @@ class EchoClientGreenletActor(GreenletActor):
             message = message.strip()
             if self.parent is not None:
                 self.logger.debug('%s.on_handle(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
+                try:
+                    self.parent.send(message)
+                except:
+                    self.logger.debug('%s.on_handle(), parent stopped: %s' % (self.name, self.parent))
             else:
                 self.logger.debug('%s.on_handle(), send "%s" to itself' % (self.name, message))
-                self.send(message)
+                try:
+                    self.send(message)
+                except:
+                    self.logger.debug('%s.on_handle(), actor stopped: %s' % (self.name, self))
 
 
 class SenderGreenletActor(GreenletActor):
@@ -89,7 +100,10 @@ class SenderGreenletActor(GreenletActor):
         receivers = [r for r in self.find(actor_name='Receiver')]
         self.logger.debug('%s.on_handle(), receivers: %s' % (self.name, receivers))
         for actor in receivers:
-            actor.send('message from sender')
+            try:
+                actor.send('message from sender')
+            except:
+                self.logger.debug('%s.on_handle(), actor stopped: %s' % (self.name, actor))
             self.logger.debug('%s.on_handle(), message sent to actor %s' % (self.name, actor))
             self.stop()
 
@@ -101,10 +115,17 @@ class ReceiverGreenletActor(GreenletActor):
         if message:
             if self.parent is not None:
                 self.logger.debug('%s.on_receive(), send "%s" to parent' % (self.name, message))
-                self.parent.send(message)
+                try:
+                    self.parent.send(message)
+                except:
+                    self.logger.debug('%s.on_receive(), parent stopped: %s' % (self.name, self.parent))
             else:
                 self.logger.debug('%s.on_receive(), send "%s" to itself' % (self.name, message))
-                self.send(message)
+                try:
+                    self.send(message)
+                except:
+                    self.logger.debug('%s.on_receive(), actor stopped: %s' % (self.name, self))
+                    
             self.stop()
 
 '''
@@ -117,7 +138,7 @@ def test_run():
     test_name = 'test_greenlet_actors.test_run'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent',logger=logger)
+    parent = ParentActor(name='Parent',logger=logger)
     child = TestGreenletActor(name='Child', logger=logger)
     parent.add_child(child)
     for i in range(10):
@@ -125,9 +146,9 @@ def test_run():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 10, result
-    assert result == ['imap_job:%s' % test_name for _ in range(10)], result
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 10, storage_dump
+    assert storage_dump == ['imap_job:%s' % test_name for _ in range(10)], storage_dump
 
 def test_echo_client():
     ''' test_greenlet_actors.test_echo_client
@@ -135,7 +156,7 @@ def test_echo_client():
     test_name = 'test_greenlet_actors.test_echo_client'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent',logger=logger)
+    parent = ParentActor(name='Parent',logger=logger)
     child = EchoClientGreenletActor(name='EchoClientActor', logger=logger)
     parent.add_child(child)
     for _ in range(5):
@@ -143,9 +164,9 @@ def test_echo_client():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 5, result
-    assert result == ['imap_job:%s' % test_name for _ in range(5)], result
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 5, storage_dump
+    assert storage_dump == ['imap_job:%s' % test_name for _ in range(5)], storage_dump
 
 def test_echo_client_concurrent_requests():
     ''' test_greenlet_actors.test_echo_client_concurrent_requests
@@ -153,7 +174,7 @@ def test_echo_client_concurrent_requests():
     test_name = 'test_greenlet_actors.test_echo_client_concurrent_requests'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent',logger=logger)
+    parent = ParentActor(name='Parent',logger=logger)
     child = EchoClientGreenletActor(name='EchoClientActor', logger=logger, imap_size=5)
     parent.add_child(child)
     for _ in range(20):
@@ -161,9 +182,9 @@ def test_echo_client_concurrent_requests():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 20, result
-    assert result == ['imap_job:%s' % test_name for _ in range(20)], result
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 20, storage_dump
+    assert storage_dump == ['imap_job:%s' % test_name for _ in range(20)], storage_dump
 
 def test_processing_with_children():
     ''' test_greenlet_actors.test_processing_with_children
@@ -171,7 +192,7 @@ def test_processing_with_children():
     test_name = 'test_greenlet_actors.test_processing_with_children'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent', logger=logger)      
+    parent = ParentActor(name='Parent', logger=logger)      
     for i in range(5):
         child = EchoClientGreenletActor(name='Child-%s' % i, logger=logger)
         for i in range(3):
@@ -180,13 +201,13 @@ def test_processing_with_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 15, result
-    assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2', \
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 15, storage_dump
+    assert set(storage_dump) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2', \
                                'imap_job:Child-1:0','imap_job:Child-1:1','imap_job:Child-1:2', \
                                'imap_job:Child-2:0','imap_job:Child-2:1','imap_job:Child-2:2', \
                                'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
-                               'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2',]), result
+                               'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2',]), storage_dump
 
 def test_processing_with_diff_timelife_children():
     ''' test_greenlet_actors.test_processing_with_diff_timelife_children
@@ -194,7 +215,7 @@ def test_processing_with_diff_timelife_children():
     test_name = 'test_greenlet_actors.test_processing_with_diff_timelife_children'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent', logger=logger)      
+    parent = ParentActor(name='Parent', logger=logger)      
     for i in range(5):
         child = EchoClientGreenletActor(name='Child-%s' % i, logger=logger)
         for ii in range(i):
@@ -203,12 +224,12 @@ def test_processing_with_diff_timelife_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 10, result
-    assert set(result) == set(['imap_job:Child-1:0','imap_job:Child-2:0','imap_job:Child-2:1', \
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 10, storage_dump
+    assert set(storage_dump) == set(['imap_job:Child-1:0','imap_job:Child-2:0','imap_job:Child-2:1', \
                                'imap_job:Child-3:0','imap_job:Child-3:1','imap_job:Child-3:2', \
                                'imap_job:Child-4:0','imap_job:Child-4:1','imap_job:Child-4:2', \
-                               'imap_job:Child-4:3',]), result
+                               'imap_job:Child-4:3',]), storage_dump
 
 def test_send_msg_between_actors():
     ''' test_greenlet_actors.test_send_msg_between_actors
@@ -216,22 +237,25 @@ def test_send_msg_between_actors():
     test_name = 'test_greenlet_actors.test_send_msg_between_actors'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
 
-    parent = ParentGeneratorActor(name='Parent', logger=logger)      
+    parent = ParentActor(name='Parent', logger=logger)      
     parent.add_child(SenderGreenletActor(name='Sender', logger=logger))      
     parent.add_child(ReceiverGreenletActor(name='Receiver', logger=logger))      
     parent.start()
     pyactors.joinall([parent,])
-    assert parent.inbox.get() == 'message from sender'  
+    assert parent.storage.dump() == ['message from sender',]
 
 def test_send_stop_msg_to_child():
     ''' test_greenlet_actors.test_send_stop_msg_to_child
     '''        
-    class Parent(pyactors.actor.Actor):
+    class Parent(ParentActor):
         def on_handle(self):
         
             for child in self.children:
                 self.logger.debug('%s.on_handle(), send "stop" message to child: %s' % (self.name, child))
-                child.send({'system-msg': {'type': 'stop', 'sender': self.address}})
+                try:
+                    child.send({'system-msg': {'type': 'stop', 'sender': self.address}})
+                except:
+                    self.logger.debug('%s.on_handle(), child stopped: %s' % (self.name, child))                    
                 
             if len(self.children) == 0:
                 self.stop()
@@ -247,18 +271,21 @@ def test_send_stop_msg_to_child():
     parent.start()
     pyactors.joinall([parent,])
     
-    assert len(parent.inbox) > 0, 'parent.inbox: %s messages' % len(parent.inbox)
+    assert len(parent.storage) > 0, 'parent.storage: %s messages' % len(parent.storage)
 
 def test_send_wrong_system_msg():
     ''' test_greenlet_actors.test_send_wrong_system_msg
     '''        
-    class Parent(pyactors.actor.Actor):
+    class Parent(ParentActor):
         def on_handle(self):
             ''' on_handle
             '''
             for child in self.children:
                 self.logger.debug('%s.on_handle(), send "wrong" system message to child: %s' % (self.name, child))
-                child.send({'system-msg': 'a1b2c3d4'})
+                try:
+                    child.send({'system-msg': 'a1b2c3d4'})
+                except:
+                    self.logger.debug('%s.on_handle(), child stopped: %s' % (self.name, child))
                 
             if len(self.children) == 0:
                 self.stop()
@@ -267,8 +294,8 @@ def test_send_wrong_system_msg():
             ''' on_receive
             '''
             self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
-            self.send(message)
-            self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+            self.logger.debug('%s.on_receive(), message: "%s" sent to storage' % (self.name, message))
+            self.storage.put(message)
                 
     test_name = 'test_greenlet_actors.test_send_wrong_system_msg'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
@@ -280,7 +307,7 @@ def test_send_wrong_system_msg():
     parent.start()
     pyactors.joinall([parent,])
     
-    result = parent.inbox.dump()
-    assert len(result) == 3, 'parent.inbox: %s messages' % len(result)
-    assert set(result) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2']), result
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 3, 'parent.storage: %s messages' % len(storage_dump)
+    assert set(storage_dump) == set(['imap_job:Child-0:0','imap_job:Child-0:1','imap_job:Child-0:2']), storage_dump
 

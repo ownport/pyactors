@@ -64,9 +64,6 @@ class Actor(object):
         # actor's children
         self._children = dict()
         
-        # processing
-        self._processing = False        
-        
         # running process
         self._running = None
         
@@ -98,7 +95,6 @@ class Actor(object):
     def start(self):
         ''' start actor 
         '''
-        self._processing = True
         self._running =self.run() 
         
         # start child-actors
@@ -180,7 +176,7 @@ class Actor(object):
         self.logger.error('Unhandled exception in %s' % self,
                            exc_info=(exception_type, exception_value, traceback))
         self.on_failure(exception_type, exception_value, traceback)
-        self._processing = False
+        self._stopping = True
 
     def add_child(self, actor):
         ''' add actor's child
@@ -203,7 +199,7 @@ class Actor(object):
     def _processing_loop(self):
         ''' processing loop
         '''
-        while self._processing:
+        while True:
             # if inbox is empty and 'stop' command received -> stop processing
             if self._stopping and len(self.inbox) == 0:
                 break
@@ -228,7 +224,7 @@ class Actor(object):
     def _supervise_loop(self):
         ''' supervise loop
         '''
-        while self._processing:
+        while True:
             for child in self.children:
                 self.logger.debug('%s.supervise_loop(), child.run_once(): %s' % (self.name, child))
                 if not child.run_once():
@@ -249,7 +245,7 @@ class Actor(object):
         processing_loop = self._processing_loop()
         supervise_loop = self._supervise_loop()
 
-        while self._processing:
+        while True:
 
             # processing_loop
             if processing_loop is not None:
@@ -270,7 +266,9 @@ class Actor(object):
                 except StopIteration:
                     self.logger.debug('%s.run(), supervising completed' % self.name)
                     supervise_loop = None
-
+            # check when actor is finished
+            if processing_loop is None and supervise_loop is None:
+                break
             yield True
         
         self.logger.debug('%s.run(), processing_loop completed' % self.name)

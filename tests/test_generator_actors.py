@@ -5,7 +5,7 @@ if '' not in sys.path:
 import pyactors
 from pyactors.logs import file_logger
 from pyactors.generator import GeneratorActor
-from pyactors.exceptions import EmptyInboxException
+from pyactors.exceptions import EmptyInbox
 
 from tests import ParentGeneratorActor as ParentActor
 from tests import SenderGeneratorActor as Sender
@@ -22,9 +22,9 @@ def test_run():
     actor.start()
     pyactors.joinall([actor,])
 
-    result = actor.inbox.dump()
-    assert len(result) == 10, result
-    assert set(result) == set(['Actor:%d' % i for i in range(10)]), result
+    storage_dump = actor.storage.dump()
+    assert len(storage_dump) == 10, storage_dump
+    assert set(storage_dump) == set(['Actor:%d' % i for i in range(10)]), storage_dump
 
 def test_processing_with_children():
     ''' test_generator_actors.test_processing_with_children
@@ -38,18 +38,18 @@ def test_processing_with_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 15, result
-    assert set(result) == set(['Child-0:0','Child-0:1','Child-0:2', \
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 15, storage_dump
+    assert set(storage_dump) == set(['Child-0:0','Child-0:1','Child-0:2', \
                                'Child-1:0','Child-1:1','Child-1:2', \
                                'Child-2:0','Child-2:1','Child-2:2', \
                                'Child-3:0','Child-3:1','Child-3:2', \
-                               'Child-4:0','Child-4:1','Child-4:2',]), result
+                               'Child-4:0','Child-4:1','Child-4:2',]), storage_dump
 
 def test_stop_children_in_the_middle():
     ''' test_generator_actors.test_stop_children_in_the_middle
     '''    
-    class Parent(pyactors.actor.Actor):
+    class Parent(ParentActor):
         def on_handle(self):
             self.stop()
             
@@ -62,7 +62,7 @@ def test_stop_children_in_the_middle():
     parent.start()
     pyactors.joinall([parent,])
     
-    assert len(parent.inbox) == 0, 'parent inbox size: %s' % len(parent.inbox)
+    assert len(parent.storage) == 0, 'parent storage: %d' % len(parent.storage)
 
 def test_processing_with_diff_timelife_children():
     ''' test_generator_actors.test_processing_with_diff_timelife_children
@@ -76,11 +76,11 @@ def test_processing_with_diff_timelife_children():
     parent.start()
     pyactors.joinall([parent,])
 
-    result = parent.inbox.dump()
-    assert len(result) == 10, result
-    assert set(result) == set(['Child-1:0','Child-2:0','Child-2:1', \
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 10, storage_dump
+    assert set(storage_dump) == set(['Child-1:0','Child-2:0','Child-2:1', \
                                'Child-3:0','Child-3:1','Child-3:2', \
-                               'Child-4:0','Child-4:1','Child-4:2','Child-4:3',]), result
+                               'Child-4:0','Child-4:1','Child-4:2','Child-4:3',]), storage_dump
 
 def test_send_msg_between_actors():
     ''' test_generator_actors.test_send_msg_between_actors
@@ -93,41 +93,47 @@ def test_send_msg_between_actors():
     parent.add_child(Receiver(name='Receiver', logger=logger))      
     parent.start()
     pyactors.joinall([parent,])
-    assert parent.inbox.get() == 'message from sender'  
+    assert parent.storage.dump() == ['message from sender',]
 
 def test_send_stop_msg_to_child():
     ''' test_generator_actors.test_send_stop_msg_to_child
     '''        
-    class Parent(pyactors.actor.Actor):
+    class Parent(ParentActor):
         def on_handle(self):
         
             for child in self.children:
                 self.logger.debug('%s.on_handle(), send "stop" message to child: %s' % (self.name, child))
-                child.send({'system-msg': {'type': 'stop', 'sender': self.address}})
+                try:
+                    child.send({'system-msg': {'type': 'stop', 'sender': self.address}})
+                except:
+                    pass
                 
             if len(self.children) == 0:
                 self.stop()
                 
     test_name = 'test_generator_actors.test_send_stop_msg_to_child'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
-    parent = Parent(name='Parent', logger=logger)      
+    parent = Parent(name='Parent', logger=logger)   
     for i in range(5):
         parent.add_child(TestActor(name='Child-%d' % i, logger=logger))
     parent.start()
     pyactors.joinall([parent,])
     
-    assert len(parent.inbox) > 0, 'parent.inbox: %s messages' % len(parent.inbox)
+    assert len(parent.storage) > 0, 'storage: %s messages' % len(parent.storage)
 
 def test_send_wrong_system_msg():
     ''' test_generator_actors.test_send_wrong_system_msg
     '''        
-    class Parent(pyactors.actor.Actor):
+    class Parent(ParentActor):
         def on_handle(self):
             ''' on_handle
             '''
             for child in self.children:
                 self.logger.debug('%s.on_handle(), send "wrong" system message to child: %s' % (self.name, child))
-                child.send({'system-msg': 'a1b2c3d4'})
+                try:
+                    child.send({'system-msg': 'a1b2c3d4'})
+                except:
+                    self.logger.debug('%s.on_handle(), child stopped: %s' % (self.name, child))
                 
             if len(self.children) == 0:
                 self.stop()
@@ -136,8 +142,9 @@ def test_send_wrong_system_msg():
             ''' on_receive
             '''
             self.logger.debug('%s.on_receive(), messages in inbox: %s' % (self.name, len(self.inbox)))
-            self.send(message)
-            self.logger.debug('%s.on_receive(), message: "%s" sent to itself' % (self.name, message))
+            self.logger.debug('%s.on_receive(), message: "%s" sent to storage' % (self.name, message))
+            self.storage.put(message)
+            self.logger.debug('%s.on_receive(), messages in storage: %d' % (self.name, len(self.storage)))
                 
     test_name = 'test_generator_actors.test_send_wrong_system_msg'
     logger = file_logger(test_name, filename='logs/%s.log' % test_name) 
@@ -146,14 +153,8 @@ def test_send_wrong_system_msg():
     parent.start()
     pyactors.joinall([parent,])
     
-    result = []
-    while True:
-        try:
-            result.append(parent.inbox.get())
-        except EmptyInboxException:
-            break
-
-    assert len(result) == 3, 'parent.inbox: %s messages' % len(result)
-    assert set(result) == set(['Child-0:0','Child-0:1','Child-0:2']), result
+    storage_dump = parent.storage.dump()
+    assert len(storage_dump) == 3, 'parent storage: %s messages' % len(storage_dump)
+    assert set(storage_dump) == set(['Child-0:0','Child-0:1','Child-0:2']), storage_dump
 
 
