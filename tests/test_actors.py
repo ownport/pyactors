@@ -5,7 +5,7 @@ if '' not in sys.path:
 import pyactors
 from pyactors.actor import Actor
 from pyactors.logs import file_logger
-from pyactors.exceptions import EmptyInboxException
+from pyactors.exceptions import EmptyInbox
 from tests import SimpleActor
 
 def test_actors_name():
@@ -34,7 +34,7 @@ def test_joinall():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
 
 def test_killall():
@@ -76,7 +76,7 @@ def test_raise_error_on_start():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
 
 def test_raise_error_on_stop():
@@ -95,7 +95,7 @@ def test_raise_error_on_stop():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
 
 def test_on_receive():
@@ -114,7 +114,7 @@ def test_on_receive():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
     
 def test_on_receive_failure():
@@ -133,7 +133,7 @@ def test_on_receive_failure():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
     
 def test_on_handle_failure():    
@@ -151,7 +151,7 @@ def test_on_handle_failure():
     pyactors.joinall([actor,])
     try:
         assert actor.inbox.get() == 'message-response'
-    except EmptyInboxException:
+    except EmptyInbox:
         pass
 
 def test_add_remove_child():

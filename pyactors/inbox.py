@@ -26,7 +26,7 @@ import logging
 import collections
 import multiprocessing
 
-from pyactors.exceptions import EmptyInboxException
+from pyactors.exceptions import EmptyInbox
 from gevent.queue import Queue as GeventQueue
 from gevent.queue import Empty as GeventQueueEmpty
 
@@ -46,7 +46,7 @@ class DequeInbox(object):
         ''' get data from inbox 
         '''
         if len(self.__inbox) == 0:
-            raise EmptyInboxException
+            raise EmptyInbox
         
         return self.__inbox.popleft()
     
@@ -64,7 +64,7 @@ class DequeInbox(object):
         while True:
             try:
                 result.append(self.get())
-            except EmptyInboxException:
+            except EmptyInbox:
                 break
         return result
 
@@ -90,7 +90,7 @@ class QueueInbox(object):
         ''' get data from inbox 
         '''
         if self.__inbox.empty():
-            raise EmptyInboxException
+            raise EmptyInbox
         
         return self.__inbox.get_nowait()
     
@@ -108,7 +108,7 @@ class QueueInbox(object):
         while True:
             try:
                 result.append(self.get())
-            except EmptyInboxException:
+            except EmptyInbox:
                 break
         return result
 
@@ -134,7 +134,7 @@ class GeventInbox(object):
         ''' get data from inbox 
         '''
         if self.__inbox.empty():
-            raise EmptyInboxException
+            raise EmptyInbox
         
         return self.__inbox.get_nowait()
     

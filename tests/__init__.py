@@ -8,12 +8,18 @@ from pyactors.actor import Actor
 class SimpleActor(Actor):
 
     def on_handle(self):
-        self.send('message')
+        try:
+            self.send('message')
+        except:
+            pass
 
     def on_receive(self, message):
         self.logger.debug('SimpleActor.on_receive()')
         if message:
-            self.send('%s-response' % message)
+            try:
+                self.send('%s-response' % message)
+            except:
+                pass
         self.stop()
 
 ''' 

@@ -26,10 +26,16 @@ import uuid
 import logging
 
 from pyactors.inbox import DequeInbox
-from pyactors.exceptions import EmptyInboxException
+from pyactors.exceptions import EmptyInbox
+from pyactors.exceptions import StopReceived
+
+class BaseActor(object):
+    ''' Base class for creating Actors
+    '''
+    pass
 
 class Actor(object):
-    ''' Base class for creating Actors 
+    ''' Actor 
     '''
     def __init__(self, name=None, logger=None):
         ''' __init__
@@ -63,6 +69,9 @@ class Actor(object):
         
         # running process
         self._running = None
+        
+        # if True, stopping process active
+        self._stopping = False
 
     def __str__(self):
         ''' represent actor as string
@@ -114,13 +123,10 @@ class Actor(object):
     def send(self, message):
         ''' send message to actor
         '''
-        self.inbox.put(message)
-
-    def _stop(self):
-        ''' stop actor
-        '''
-        if self.children == 0:
-            self._processing = False
+        if not self._stopping:
+            self.inbox.put(message)
+        else:
+            raise StopReceived
     
     def on_stop(self):
         ''' on stop event handler
@@ -130,19 +136,13 @@ class Actor(object):
     def stop(self):
         ''' stop actor 
         '''
+        self._stopping = True
         # stop child-actors
         for child in self.children:
             # child.stop()
             stop_message = { 'system-msg': {'type': 'stop', 'sender': self.address } }
             child.send(stop_message)
         
-        try:
-            self.on_stop()
-        except:
-            self._handle_failure(*sys.exc_info())
-        
-        self._processing = False
-
     def on_failure(self, exception_type, exception_value, traceback):
         ''' on failure event handler
         '''
@@ -157,7 +157,8 @@ class Actor(object):
             return
         
         msg_type = message.get('type', None)
-        if msg_type and msg_type == 'stop' and message.get('sender','') == self.parent.address:
+        sender = message.get('sender','')
+        if msg_type and msg_type == 'stop' and sender == self.parent.address:
             self.stop()
             self.logger.debug('%s._handle_system_message(), message "stop" received' % self.name)
 
@@ -203,9 +204,13 @@ class Actor(object):
         ''' processing loop
         '''
         while self._processing:
+            # if inbox is empty and 'stop' command received -> stop processing
+            if self._stopping and len(self.inbox) == 0:
+                break
+
             try:
                 message = self.inbox.get()
-            except EmptyInboxException:
+            except EmptyInbox:
                 message = None
 
             if message:
@@ -270,6 +275,12 @@ class Actor(object):
         
         self.logger.debug('%s.run(), processing_loop completed' % self.name)
         self.logger.debug('%s.run(), supervise_loop completed' % self.name)
+        
+        try:
+            self.on_stop()
+        except:
+            self._handle_failure(*sys.exc_info())
+        
         yield False
         
     def run_once(self):

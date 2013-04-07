@@ -21,7 +21,12 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE."""
 
-class EmptyInboxException(Exception):
+class EmptyInbox(Exception):
     ''' The exception is raised when actor's inbox is empty
     '''
     pass
+
+class StopReceived(Exception):
+    ''' The exception is raised when actor is stopping
+    '''
+    pass    

@@ -4,7 +4,6 @@ if '' not in sys.path:
 
 import pyactors
 from pyactors.logs import file_logger
-from pyactors.exceptions import EmptyInboxException
 
 from tests import ParentGeneratorActor as ParentActor
 from tests import TestThreadedGeneratorActor as TestActor
