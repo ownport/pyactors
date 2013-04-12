@@ -18,11 +18,14 @@ class StorageActor(Actor):
 class SimpleActor(StorageActor):
 
     def on_handle(self):
-        actor.send('message')
+        try:
+            self.send('message')
+        except:
+            self.stop()
 
     def on_receive(self, message):
         self.logger.debug('%s.on_receive(), message: %s' % (self._name, message))
-        actor.storage.put('%s-response' % message)
+        self.storage.put('%s-response' % message)
         self.stop()
 
 ''' 
