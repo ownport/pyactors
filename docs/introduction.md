@@ -4,33 +4,51 @@ Simple implementation actors on python. Experimental project. It's attempt to me
 
 ## Installation
 
-The pyactors's sources are available on [github](https://github.com/ownport/pyactors) or as the library via pip:
+The pyactors's sources are available on [github](https://github.com/ownport/pyactors) or it's available as the library via pip:
 ```
 $ pip install pyactors
 ```
 
 ## Building blocks
 
-The basic class for creation actors is Actor class. It defines the collection of common methods and properties for all actors: name, processing, waiting, start(), stop(), parent, add_child(), children, remove_child(), run(), loop(), supervise(), send(), find(). See [PyActors API](https://github.com/ownport/pyactors/blob/master/docs/api.md) for more details.
+The basic class for creation actors is Actor class. It defines the collection of common methods and properties for all actors: name, start(), stop(), parent, add_child(), children, remove_child(), run(), run_once(), join(), send(), find(). See [PyActors API](https://github.com/ownport/pyactors/blob/master/docs/api.md) for more details.
 
-All logics for processing data in the actor is based on sending or receiving messages. Two methods are used for these purposes: on_receive() and on_handle()
+The actor is independent processing unit. The actor has three essential elements of computation. It has in body: processing, storage, communication. The communication between actors is based on sending or receiving messages. Two methods are used for these purposes: on_receive() and on_handle().
 
 - on_receive() method is called in case when actor received message
-- on_handle() method is called every time when actor gets control. It can be used when actor should send message even incoming message is not received. For example: actor is used as generator for message series.
 
-The actor can create new actors as a child by `add_child()` method or remove it by `remove_child()`. The actor with children performs supervising role for its children. The supervising logic handled in _supervise_loop()
+```python
+class SimpleActor(pyactors.actor.Actor):
+    def on_receive(self, message):
+        self.storage.put(message)
+```
+
+- on_handle() method is called every time when actor gets control. It can be used when actor should send message even incoming message is not received. As example: actor is used as generator for message series.
+
+```python
+class SimpleActor(pyactors.actor.Actor):
+    def on_handle(self):
+        try:
+            self.send('message')
+        except StopReceived:
+            pass
+```
+
+The actor can create new actors as a child by `add_child()` method or remove it by `remove_child()`. The actor with children performs supervising role for its children. The supervising logic handled in _supervise_loop().
+
+- start()
+
+- joinall()
 
 ## Actor types
 
-At the moment pyactors supported 4 approaches for working with actors: generators, greenlets, threads and processes. Based on this 4 actors can be created:
+At the moment pyactors supported 3 approaches for working with actors: generators, greenlets and threads. Based on this 3 actors can be created:
 
 - GeneratorActor, based on generators
 - GreenletActor, based on GeneratorActor and imap_nonblocking function
 - ThreadedGeneratorActor, the same as GeneratorActor but the actor created in separated thread
-- ForkedGeneratorActor, the same as GeneratorActor but the actor created in separated process
-- ForkedGreenletActor, the same as GreenletActor but the actor created in separated process
 
-GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The example of GeneratorActor:
+GeneratorActor is basic actor. There's no need to install external library, standard python library is enough. The example, GeneratorActor:
 ```python
 class Receiver(GeneratorActor):
     ''' Receiver
@@ -85,13 +103,11 @@ More examples how to use actors with pyactors can be founded in [tests](https://
 
 Recommended combination of Actor's parents and children. 
 
-Parent/Children | Generator | Greenlet | ThreadedGenerator | ForkedGenerator | ForkedGreenlet
---- | --- | --- | --- | --- | ---
-Generator | X | X | X | X | X
-Greenlet | X | X | X | X | X
-ThreadedGenerator | X | X | | |
-ForkedGenerator | X | X | X | |
-ForkedGreenlet | X | X | | |
+Parent/Children | Generator | Greenlet | ThreadedGenerator 
+--- | --- | --- | --- 
+Generator | X | X | X 
+Greenlet | X | X | X 
+ThreadedGenerator | X | X | 
 
 ## System messages
 
